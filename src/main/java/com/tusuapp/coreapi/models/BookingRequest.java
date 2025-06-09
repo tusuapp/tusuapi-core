@@ -1,19 +1,18 @@
 package com.tusuapp.coreapi.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-
-@Entity(name = "tutor_booking_requests")
+@Entity
+@Table(name = "v2_booking_requests")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class BookingRequest {
 
     @Id
@@ -26,42 +25,63 @@ public class BookingRequest {
     @Column(name = "tutor_id")
     private Long tutorId;
 
+    @Column(name = "subject_id")
+    private Long subjectId;
+
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
+
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
+
+    @Column(name = "status")
+    private String status; // e.g., requested, scheduled, completed, cancelled
+
+    @Column(name = "is_rescheduled")
+    private Boolean isRescheduled = false;
+
+    @Column(name = "parent_booking_id")
+    private Long parentBookingId; // If this is a reschedule, reference the original booking
+
+    @Column(name = "reschedule_reason", columnDefinition = "TEXT")
+    private String rescheduleReason;
+
+    @Column(name = "rescheduled_at")
+    private LocalDateTime rescheduledAt;
+
+    @Column(name = "is_paid")
+    private Boolean isPaid = false;
+
+    @Column(name = "transaction_id")
+    private String transactionId;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @Column(name = "slot_id")
     private Long slotId;
 
-    @Column(name = "from_datetime")
-    private LocalDateTime fromDateTime;
-
-    @Column(name = "to_datetime", nullable = false)
-    private LocalDateTime toDateTime;
-
-    @Column(name = "created_by")
-    private Long createdBy;
-
-    @Column(name = "updated_by")
-    private Long updatedBy;
-
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "total_amount")
-    private Double totalAmount;
-
     @Column(name = "commission_amount")
-    private Double commissionAmount;
+    private BigDecimal commissionAmount;
 
-    @Column(name = "subject", nullable = false)
-    private String subject;
+    @Column(name = "hourly_charge")
+    private BigDecimal hourlyCharge;
 
-    @Column(name = "subject_id", nullable = false)
-    private Integer subjectId;
+    @Column(name = "currency")
+    private String currency;
 
-    @Column(name = "is_paid", nullable = false)
-    private Boolean isPaid;
 
-    @Column(name = "status", nullable = false)
-    private String status;
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }
