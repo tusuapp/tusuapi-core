@@ -20,10 +20,6 @@ public class User {
     private String email;
     private String provider;
     private String password;
-//    @Column(name = "resetPasswordToken")
-//    private String resetPasswordToken;
-//    @Column(name = "confirmationToken")
-//    private String confirmationToken;
     private Boolean confirmed;
     private Boolean blocked;
     private Integer role;

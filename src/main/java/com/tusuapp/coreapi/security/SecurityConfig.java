@@ -43,7 +43,7 @@ public class SecurityConfig {
             // Configure endpoint authorization
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
-                .requestMatchers("/auth/welcome", "/auth/addNewUser", "/auth/generateToken").permitAll()
+                .requestMatchers("/auth/welcome", "/auth/addNewUser", "/error").permitAll()
                 
                 // Role-based endpoints
                 .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
