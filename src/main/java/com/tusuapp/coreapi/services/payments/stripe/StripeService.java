@@ -13,6 +13,7 @@ import com.tusuapp.coreapi.repositories.PaymentSessionRepo;
 import com.tusuapp.coreapi.repositories.UserInfoRepo;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -44,12 +45,12 @@ public class StripeService {
     String clientBaseURL = "https://tusuapp.com/student/payment";
 
 
-//    @Value("${STRIPE_API_KEY}")
-//    String STRIPE_API_KEY;
+    @Value("${STRIPE_API_KEY}")
+    String STRIPE_API_KEY;
 
     @Autowired
     StripeService() {
-        Stripe.apiKey = "sk_test_51MNzxoSENC2ebtoEDwsTy6jaF9atPHrYv8bElPv0fL4fWkEEbzZU85EiXvMZ4pjr0bW1AXUiwtzHASaqPoLBOhPb00WF7BRNNx";
+        Stripe.apiKey = STRIPE_API_KEY;
     }
 
     public ResponseEntity<?> initiateBookingPayment(Long requestId) throws StripeException {
@@ -158,6 +159,6 @@ public class StripeService {
             e.printStackTrace();
         }
 
-
+        return ResponseEntity.ok().build();
     }
 }
