@@ -151,9 +151,9 @@ public class StripeService {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Session not found");
             }
             PaymentSession paymentSession = sessionOptional.get();
-//            if (paymentSession.isCompleted()) {
-//                return ResponseEntity.ok("Payment already completed");
-//            }
+            if (paymentSession.isCompleted()) {
+                return ResponseEntity.ok("Payment already completed");
+            }
             Session session = Session.retrieve(paymentSession.getStripeSessionId());
             System.out.println(session.getStatus());
             String message = "";
