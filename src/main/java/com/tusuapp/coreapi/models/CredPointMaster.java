@@ -23,7 +23,7 @@ public class CredPointMaster {
     @Column(nullable = false)
     private double balance;
 
-    @Column(name = "created_by", nullable = false)
+    @Column(name = "created_by")
     private Integer createdBy;
 
     @Column(name = "updated_by", nullable = false)

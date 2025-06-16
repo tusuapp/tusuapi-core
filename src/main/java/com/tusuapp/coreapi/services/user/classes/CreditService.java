@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
+
 
 @Service
 public class CreditService {
@@ -25,10 +27,12 @@ public class CreditService {
             }
             CredPointMaster creditPoint = creditPointOptional.get();
             creditPoint.setBalance(creditPoint.getBalance() + amount);
+            creditPoint.setUpdatedBy(Math.toIntExact(getCurrentUserId()));
             creditPoint.setUpdatedAt(LocalDateTime.now());
             creditPointRepo.save(creditPoint);
             return true;
         }catch (Exception e){
+            e.printStackTrace();
             return false;
         }
     }
@@ -44,8 +48,9 @@ public class CreditService {
             if(creditPoint.getBalance() < amount){
                 throw new IllegalArgumentException("No enough balance to reduce");
             }
+            creditPoint.setUpdatedBy(Math.toIntExact(getCurrentUserId()));
             creditPoint.setBalance(creditPoint.getBalance() - amount);
-
+            System.out.println("Reduced credits = " + creditPoint.getBalance());
             creditPoint.setUpdatedAt(LocalDateTime.now());
             creditPointRepo.save(creditPoint);
             return true;
