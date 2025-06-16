@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 public class InitiateBookingReqDto {
     private Long slot_id;
     private Long subject_id;
-    private String tutor_id;
 }

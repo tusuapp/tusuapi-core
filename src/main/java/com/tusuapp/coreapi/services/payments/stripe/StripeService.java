@@ -4,13 +4,14 @@ import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
-import com.tusuapp.coreapi.constants.TransactionConstants;
+import com.tusuapp.coreapi.constants.BookingConstants;
 import com.tusuapp.coreapi.models.BookingRequest;
-import com.tusuapp.coreapi.models.CreditPoint;
 import com.tusuapp.coreapi.models.PaymentSession;
 import com.tusuapp.coreapi.repositories.BookingRequestRepo;
 import com.tusuapp.coreapi.repositories.PaymentSessionRepo;
 import com.tusuapp.coreapi.repositories.UserInfoRepo;
+import com.tusuapp.coreapi.services.user.classes.ClassesService;
+import com.tusuapp.coreapi.services.user.classes.CreditService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,8 +25,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.tusuapp.coreapi.constants.TransactionConstants.TRANSACTION_TYPE_BALANCE_BUY;
 import static com.tusuapp.coreapi.constants.TransactionConstants.TRANSACTION_TYPE_CREDIT_BUY;
+import static com.tusuapp.coreapi.constants.TransactionConstants.TRANSACTION_TYPE_REMAINING_BUY;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 
 
@@ -42,6 +43,7 @@ public class StripeService {
     @Autowired
     private BookingRequestRepo bookingRequestRepo;
 
+
     String clientBaseURL = "https://tusuapp.com/student/payment";
 
 
@@ -49,29 +51,28 @@ public class StripeService {
     String STRIPE_API_KEY;
 
     @Autowired
-    StripeService() {
-        Stripe.apiKey = STRIPE_API_KEY;
-    }
+    private CreditService creditService;
 
-    public ResponseEntity<?> initiateBookingPayment(Long requestId) throws StripeException {
+    public ResponseEntity<?> purchaseRemainingCredits(Long requestId, double amount) throws StripeException {
+        Stripe.apiKey = STRIPE_API_KEY;
         BookingRequest bookingRequest = bookingRequestRepo.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("BookingRequest not found"));
 
-        BigDecimal totalAmount = bookingRequest.getHourlyCharge().add(bookingRequest.getCommissionAmount());
-
+        BigDecimal totalAmount = BigDecimal.valueOf(amount);
+        System.out.println(totalAmount);
         Map<String, String> metadata = new HashMap<>();
-        metadata.put("app_id", bookingRequest.getId().toString());
-
+        metadata.put("booking_id", bookingRequest.getId().toString());
+        metadata.put("type", "remaining_purchase");
         PaymentSession paymentSession = createStripePaymentSession(
                 "Buying credit points",
                 totalAmount,
-                metadata
+                metadata,
+                TRANSACTION_TYPE_REMAINING_BUY
         );
 
         JSONObject response = new JSONObject();
         response.put("session", paymentSession);
         response.put("payment_url", Session.retrieve(paymentSession.getStripeSessionId()).getUrl());
-
         return ResponseEntity.ok(response.toMap());
     }
 
@@ -83,7 +84,8 @@ public class StripeService {
         PaymentSession paymentSession = createStripePaymentSession(
                 "Buy credit points",
                 BigDecimal.valueOf(amount),
-                metadata
+                metadata,
+                TRANSACTION_TYPE_CREDIT_BUY
         );
 
         JSONObject response = new JSONObject();
@@ -95,9 +97,17 @@ public class StripeService {
 
     private PaymentSession createStripePaymentSession(String productName,
                                                       BigDecimal amount,
-                                                      Map<String, String> metadata) throws StripeException {
+                                                      Map<String, String> metadata,
+                                                      String purchaseType) throws StripeException {
         PaymentSession paymentSession = new PaymentSession();
         paymentSession.setSessionId(UUID.randomUUID().toString());
+        paymentSession.setTotalAmount(Double.valueOf(amount.toString()));
+        //TODO set tutor id also
+
+        if(purchaseType.equals(TRANSACTION_TYPE_REMAINING_BUY)){
+            paymentSession.setBookingRequestId(Long.valueOf(metadata.get("booking_id")));
+        }
+        paymentSession.setStudentId(getCurrentUserId());
         SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(clientBaseURL + "/success?session_id=" + paymentSession.getSessionId())
@@ -117,7 +127,7 @@ public class StripeService {
                         .setPriceData(
                                 SessionCreateParams.LineItem.PriceData.builder()
                                         .setCurrency("USD")
-                                        .setUnitAmountDecimal(amount)
+                                        .setUnitAmountDecimal(amount.multiply(BigDecimal.valueOf(100)))
                                         .setProductData(productBuilder.build())
                                         .build()
                         ).build()
@@ -126,7 +136,7 @@ public class StripeService {
         // Create session with Stripe
         Session session = Session.create(paramsBuilder.build());
         paymentSession.setStripeSessionId(session.getId());
-        paymentSession.setTransactionType(TRANSACTION_TYPE_BALANCE_BUY);
+        paymentSession.setTransactionType(purchaseType);
         paymentSessionRepo.save(paymentSession);
 
         return paymentSession;
@@ -135,30 +145,54 @@ public class StripeService {
 
     public ResponseEntity<?> completePayment(String sessionID) {
         try {
+            JSONObject response = new JSONObject();
+            Stripe.apiKey = STRIPE_API_KEY;
             Optional<PaymentSession> sessionOptional = paymentSessionRepo.findById(sessionID);
-            if(sessionOptional.isEmpty()){
+            if (sessionOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Session not found");
             }
             PaymentSession paymentSession = sessionOptional.get();
-            if(paymentSession.getIsCompleted()){
+            if (paymentSession.isCompleted()) {
                 return ResponseEntity.ok("Payment already completed");
             }
             Session session = Session.retrieve(paymentSession.getStripeSessionId());
-            if(!"completed".equals(session.getStatus())){
+            System.out.println(session.getStatus());
+            String message = "";
+            if (!"complete".equals(session.getStatus())) {
                 //Add additional tracking items to keep this tracked
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Couldn't verify with stripe for payment completion");
             }
-            if(paymentSession.getTransactionType().equals(TRANSACTION_TYPE_CREDIT_BUY)){
+            if (paymentSession.getTransactionType().equals(TRANSACTION_TYPE_CREDIT_BUY)) {
                 //credit to user's account
-
+                creditService.addCredits(paymentSession.getStudentId(), paymentSession.getTotalAmount());
+                markPaymentSessionAsPaid(paymentSession);
+                message = "Credits have been added to student's account";
             }
-            if(paymentSession.getTransactionType().equals(TRANSACTION_TYPE_BALANCE_BUY)){
-                //buy that on going class
+            if (paymentSession.getTransactionType().equals(TRANSACTION_TYPE_REMAINING_BUY)) {
+                message = "Class has been booked. Please wait for tutor confirmation";
+                //Sessions should be transactional and non-volatile, first credit and then debit only
+                creditService.addCredits(paymentSession.getStudentId(), paymentSession.getTotalAmount());
+                BookingRequest bookingRequest = bookingRequestRepo.findById(paymentSession.getBookingRequestId())
+                        .orElseThrow(() -> new IllegalArgumentException("No booking request found for session"));
+                creditService.reduceCredits(bookingRequest.getStudentId(), bookingRequest.getTotalAmount());
+                //book the class in the payment session
+                bookingRequest.setIsPaid(true);
+                bookingRequest.setStatus(BookingConstants.STATUS_REQUESTED);
+                bookingRequest = bookingRequestRepo.save(bookingRequest);
+                response.put("bookingRequest",bookingRequest);
+                markPaymentSessionAsPaid(paymentSession);
             }
+            response.put("message", message);
+            return ResponseEntity.ok(response.toMap());
         } catch (StripeException e) {
             e.printStackTrace();
         }
-
         return ResponseEntity.ok().build();
     }
+
+    public void markPaymentSessionAsPaid(PaymentSession paymentSession){
+        paymentSession.setCompleted(true);
+        paymentSessionRepo.save(paymentSession);
+    }
+
 }

@@ -25,7 +25,7 @@ public class TutorDetails {
     private Integer experience;
 
     @Column(name = "hourly_charge")
-    private BigDecimal hourlyCharge;
+    private Double hourlyCharge;
 
     private String gender;
 

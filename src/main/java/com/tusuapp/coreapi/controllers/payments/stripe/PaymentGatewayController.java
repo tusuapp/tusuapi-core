@@ -13,10 +13,6 @@ public class PaymentGatewayController {
     @Autowired
     private StripeService stripeClient;
 
-    @PostMapping("/checkout-booking")
-    public ResponseEntity<?> initiateStripePayment(@RequestParam String bookingRequestId) throws Exception {
-        return stripeClient.initiateBookingPayment(Long.parseLong(bookingRequestId));
-    }
 
     @PostMapping("/buy-credits")
     public ResponseEntity<?> buyCredits(@RequestParam String topUpAmount) throws Exception {

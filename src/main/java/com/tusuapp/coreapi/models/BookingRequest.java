@@ -65,10 +65,10 @@ public class BookingRequest {
     private Long slotId;
 
     @Column(name = "commission_amount")
-    private BigDecimal commissionAmount;
+    private double commissionAmount;
 
     @Column(name = "hourly_charge")
-    private BigDecimal hourlyCharge;
+    private Double hourlyCharge;
 
     @Column(name = "currency")
     private String currency;
@@ -78,6 +78,11 @@ public class BookingRequest {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
+    }
+
+    public Double getTotalAmount(){
+
+        return this.commissionAmount + this.hourlyCharge;
     }
 
     @PreUpdate

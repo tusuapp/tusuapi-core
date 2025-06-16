@@ -17,11 +17,11 @@ public class CredPointMaster {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
-    private Integer uid;
+    @Column(nullable = false, name = "uid")
+    private Long studentId;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal balance;
+    @Column(nullable = false)
+    private double balance;
 
     @Column(name = "created_by", nullable = false)
     private Integer createdBy;

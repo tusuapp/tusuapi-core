@@ -1,4 +1,4 @@
-package com.tusuapp.coreapi.controllers.student.classes;
+package com.tusuapp.coreapi.controllers.user.classes;
 
 
 import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
@@ -9,28 +9,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/student/classes")
-public class StudentClassesController {
+@RequestMapping("/user/classes")
+public class ClassesController {
+
 
     @Autowired
     private ClassesService classesService;
 
-    @GetMapping("upcoming")
+    @GetMapping("/upcoming")
     public ResponseEntity<?> getUpcomingClasses(){
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping
-    public ResponseEntity<?> initiateBooking(@RequestBody InitiateBookingReqDto initiateBookingReqDto){
-        return classesService.initiateBooking(initiateBookingReqDto);
-    }
+
+
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getBookingDetails(@PathVariable String id){
         return classesService.getClassDetails(id);
     }
 
-    @PutMapping
     public ResponseEntity<?> makePayment(@RequestBody MakePaymentDto makePaymentDto){
         return null;
     }

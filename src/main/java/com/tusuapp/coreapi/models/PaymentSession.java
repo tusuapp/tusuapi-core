@@ -36,8 +36,16 @@ public class PaymentSession {
     private Long bookingRequestId;
 
     @Column(name = "is_completed")
-    private Boolean isCompleted;
+    private boolean isCompleted;
 
+    @Column(name = "student_id")
+    private Long studentId;
+
+    @Column(name = "tutor_id")
+    private Long tutorId;
+
+    @Column(name = "total_amount")
+    private Double totalAmount;
 
     @PrePersist
     protected void onCreate() {

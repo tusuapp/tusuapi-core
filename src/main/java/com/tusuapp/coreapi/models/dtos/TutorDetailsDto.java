@@ -14,7 +14,7 @@ public class TutorDetailsDto {
     private Long userId;
     private String description;
     private Integer experience;
-    private BigDecimal hourlyCharge;
+    private Double hourlyCharge;
     private String gender;
     private Integer createdBy;
     private Integer updatedBy;

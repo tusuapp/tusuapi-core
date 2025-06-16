@@ -1,23 +1,21 @@
 package com.tusuapp.coreapi.services.user.classes;
 
-import com.tusuapp.coreapi.models.BookingRequest;
-import com.tusuapp.coreapi.models.TutorDetails;
-import com.tusuapp.coreapi.models.TutorSlot;
-import com.tusuapp.coreapi.models.User;
+import com.stripe.exception.StripeException;
+import com.tusuapp.coreapi.constants.BookingConstants;
+import com.tusuapp.coreapi.models.*;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.bookings.BookingRequestDto;
 import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
-import com.tusuapp.coreapi.repositories.BookingRequestRepo;
-import com.tusuapp.coreapi.repositories.TutorDetailRepo;
-import com.tusuapp.coreapi.repositories.TutorSlotRepo;
-import com.tusuapp.coreapi.repositories.UserInfoRepo;
+import com.tusuapp.coreapi.repositories.*;
+import com.tusuapp.coreapi.services.payments.stripe.StripeService;
+import jakarta.transaction.Transactional;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
+import java.awt.print.Book;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -46,6 +44,11 @@ public class ClassesService {
     @Autowired
     private TutorDetailRepo tutorDetailRepo;
 
+    @Autowired
+    CreditPointRepo creditPointRepo;
+
+    @Autowired
+    private StripeService stripeService;
 
     public List<BookingRequest> getBookingRequests() {
         return bookingRequestRepo.findAll();
@@ -70,21 +73,49 @@ public class ClassesService {
 
     }
 
-    public ResponseEntity<?> initiateBooking(InitiateBookingReqDto initiateBookingReqDto) {
+    @Transactional
+    public ResponseEntity<?> purchaseClass(Long bookingRequestId) throws StripeException {
+        BookingRequest bookingRequest = bookingRequestRepo.findById(bookingRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("No Booking Found"));
+        //Check if the user has enough balance
+        CredPointMaster creditPoint = creditPointRepo.findByStudentId(bookingRequest.getStudentId())
+                .orElseThrow(()-> new IllegalArgumentException("Credit point not found for student"));
+        if(bookingRequest.getTotalAmount() > creditPoint.getBalance() ){
+            double remainingCreditsRequired = bookingRequest.getTotalAmount() - creditPoint.getBalance();
+            return stripeService.purchaseRemainingCredits(bookingRequest.getId(), remainingCreditsRequired);
+        }
+        bookingRequest.setStatus(BookingConstants.STATUS_REQUESTED);
+        bookingRequest.setIsPaid(true);
+        TutorSlot tutorSlot = tutorSlotRepo.findById(bookingRequest.getSlotId())
+                .orElseThrow(()->new IllegalArgumentException("Tutor slot no longer exists"));
+        tutorSlot.setIsBooked(true);
+        tutorSlotRepo.save(tutorSlot);
+        bookingRequest = bookingRequestRepo.save(bookingRequest);
+        return ResponseEntity.ok(bookingRequest);
+    }
+
+    public ResponseEntity<?> initiateBooking(InitiateBookingReqDto initiateBookingReqDto) throws Exception{
+        Optional<TutorSlot> tutorSlot = tutorSlotRepo.findById(initiateBookingReqDto.getSlot_id());
+        if (tutorSlot.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No slot found");
+        }
+        //check slot is already booked
+        if (tutorSlot.get().getIsBooked()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Slot already booked");
+        }
+        //check if already time passed
         BookingRequest bookingRequest = new BookingRequest();
         bookingRequest.setCreatedAt(LocalDateTime.now());
         bookingRequest.setStudentId(getCurrentUserId());
-        bookingRequest.setTutorId(Long.valueOf(initiateBookingReqDto.getTutor_id()));
         bookingRequest.setSlotId(initiateBookingReqDto.getSlot_id());
         bookingRequest.setSubjectId(initiateBookingReqDto.getSubject_id());
-        Optional<TutorSlot> tutorSlot = tutorSlotRepo.findById(initiateBookingReqDto.getSlot_id());
-        if(tutorSlot.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No slot found");
-        }
+        bookingRequest.setTutorId(tutorSlot.get().getTutorId());
+        System.out.println(bookingRequest.getTutorId());
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        bookingRequest.setStartTime(LocalDateTime.parse(tutorSlot.get().getFromDatetime().toString(),formatter));
-        bookingRequest.setEndTime(LocalDateTime.parse(tutorSlot.get().getToDatetime().toString(),formatter));
-        Optional<TutorDetails> tutorDetails = tutorDetailRepo.findById(bookingRequest.getTutorId());
+        bookingRequest.setStartTime(LocalDateTime.parse(tutorSlot.get().getFromDatetime().toString(), formatter));
+        bookingRequest.setEndTime(LocalDateTime.parse(tutorSlot.get().getToDatetime().toString(), formatter));
+        Optional<TutorDetails> tutorDetails = tutorDetailRepo.findByUserId(bookingRequest.getTutorId());
+        System.out.println(tutorDetails.get().getId());
         bookingRequest.setHourlyCharge(tutorDetails.get().getHourlyCharge());
         bookingRequest.setStatus(STATUS_CHECKOUT);
         bookingRequest = bookingRequestRepo.save(bookingRequest);
@@ -93,19 +124,19 @@ public class ClassesService {
 
     public ResponseEntity<?> getClassDetails(String id) {
         Optional<BookingRequest> bookingRequestOpt = bookingRequestRepo.findById(Long.valueOf(id));
-        if(bookingRequestOpt.isEmpty()){
+        if (bookingRequestOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         BookingRequest bookingRequest = bookingRequestOpt.get();
 
-        if(Objects.equals(bookingRequest.getStudentId(), getCurrentUserId()) &&
-                Objects.equals(bookingRequest.getTutorId(), getCurrentUserId())){
+        if (Objects.equals(bookingRequest.getStudentId(), getCurrentUserId()) &&
+                Objects.equals(bookingRequest.getTutorId(), getCurrentUserId())) {
             return ResponseEntity.notFound().build();
         }
 
         Optional<User> studentDetails = userRepo.findById(bookingRequest.getStudentId());
         Optional<User> tutorDetails = userRepo.findById(bookingRequest.getTutorId());
-        if (studentDetails.isEmpty() || tutorDetails.isEmpty()){
+        if (studentDetails.isEmpty() || tutorDetails.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tutor or student not exists, may be they have deactivated");
         }
         BookingRequestDto response = BookingRequestDto.fromBookingRequest(
