@@ -77,6 +77,8 @@ public class StripeService {
     }
 
     public ResponseEntity<?> buyCredits(Integer amount) throws StripeException {
+        Stripe.apiKey = STRIPE_API_KEY;
+
         Map<String, String> metadata = new HashMap<>();
         metadata.put("type", "wallet_top_up");
         metadata.put("buyer_id", String.valueOf(getCurrentUserId()));
