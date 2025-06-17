@@ -21,7 +21,7 @@ public class TutorSlot {
     private Long tutorId;
 
     @Column(name = "status")
-    private Boolean status;
+    private Boolean status = false;
 
     @Column(name = "created_by")
     private Long createdBy;
