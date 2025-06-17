@@ -27,5 +27,10 @@ public class SlotsController {
         return slotService.getTutorSlots(tutorId,date);
     }
 
+    @DeleteMapping
+    @PreAuthorize("hasRole('ROLE_TUTOR')")
+    public ResponseEntity<?> deleteSlot(@RequestParam Long slotId){
+        return slotService.deleteSlot(slotId);
+    }
 
 }
