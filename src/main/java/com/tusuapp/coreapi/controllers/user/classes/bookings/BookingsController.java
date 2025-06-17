@@ -26,6 +26,8 @@ public class BookingsController {
         }
     }
 
+
+
     @PostMapping("/pay")
     public ResponseEntity<?> purchaseClass(@RequestParam Long bookingId){
         try {

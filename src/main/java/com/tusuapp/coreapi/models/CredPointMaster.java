@@ -27,11 +27,14 @@ public class CredPointMaster {
     private Integer createdBy;
 
     @Column(name = "updated_by", nullable = false)
-    private Integer updatedBy;
+    private Long updatedBy;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+
+
 }

@@ -20,11 +20,11 @@ public class BookingRequest {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", insertable = false, updatable = false)
+    @JoinColumn(name = "student_id")
     private User student;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tutor_id", insertable = false, updatable = false)
+    @JoinColumn(name = "tutor_id")
     private User tutor;
 
 
@@ -71,7 +71,7 @@ public class BookingRequest {
     private double commissionAmount;
 
     @Column(name = "hourly_charge")
-    private Double hourlyCharge;
+    private double hourlyCharge;
 
     @Column(name = "currency")
     private String currency;
@@ -84,7 +84,6 @@ public class BookingRequest {
     }
 
     public Double getTotalAmount(){
-
         return this.commissionAmount + this.hourlyCharge;
     }
 

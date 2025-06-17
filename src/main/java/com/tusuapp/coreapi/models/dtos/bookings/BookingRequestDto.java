@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Data
 public class BookingRequestDto {
 
+    private Double totalAmount;
     private Long id;
     private UserDto student;
     private UserDto tutor;
@@ -26,6 +27,8 @@ public class BookingRequestDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long slotId;
+    private double hourlyFee;
+
 
     public BookingRequestDto() {
 
@@ -48,6 +51,8 @@ public class BookingRequestDto {
         this.slotId = request.getSlotId();
         this.student = UserDto.fromUser(request.getStudent());
         this.tutor = UserDto.fromUser(request.getTutor());
+        this.hourlyFee = request.getHourlyCharge();
+        this.totalAmount = request.getTotalAmount();
     }
 
     public static BookingRequestDto fromBookingRequest(BookingRequest request, UserDto student, UserDto tutor) {
@@ -68,6 +73,8 @@ public class BookingRequestDto {
         dto.setCreatedAt(request.getCreatedAt());
         dto.setUpdatedAt(request.getUpdatedAt());
         dto.setSlotId(request.getSlotId());
+        dto.setHourlyFee(request.getHourlyCharge());
+        dto.setTotalAmount(request.getTotalAmount());
         return dto;
     }
 
