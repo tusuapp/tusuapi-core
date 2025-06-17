@@ -2,7 +2,6 @@ package com.tusuapp.coreapi.utils.converters;
 
 
 import com.tusuapp.coreapi.models.TutorSlot;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,12 +13,16 @@ import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserTimeZone;
 public class TimeZoneConverter {
 
 
-
-    public static void transformTutorSlotsFromUTC(List<TutorSlot> slots){
-        slots.forEach(slot->{
+    public static void transformTutorSlotsFromUTC(List<TutorSlot> slots) {
+        slots.forEach(slot -> {
             slot.setFromDatetime(getLocalDateTime(slot.getFromDatetime()));
             slot.setToDatetime(getLocalDateTime(slot.getToDatetime()));
         });
+    }
+
+    public static void transformTutorSlotFromUTC(TutorSlot slot) {
+        slot.setFromDatetime(getLocalDateTime(slot.getFromDatetime()));
+        slot.setToDatetime(getLocalDateTime(slot.getToDatetime()));
     }
 
     private static LocalDateTime getLocalDateTime(LocalDateTime utcTime) {
@@ -29,7 +32,7 @@ public class TimeZoneConverter {
         return converted.toLocalDateTime();
     }
 
-    public static LocalDateTime getUtcDateTime(LocalDateTime tzDateTime){
+    public static LocalDateTime getUtcDateTime(LocalDateTime tzDateTime) {
         ZoneId targetZone = ZoneId.of(getCurrentUserTimeZone());
         ZonedDateTime zonedDateTime = tzDateTime.atZone(targetZone);
         ZonedDateTime utcZoned = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));

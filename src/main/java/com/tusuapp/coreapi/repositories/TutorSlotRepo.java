@@ -16,4 +16,7 @@ public interface TutorSlotRepo extends JpaRepository<TutorSlot,Long> {
     List<TutorSlot> findOverlappingSlots(@Param("tutorId") Long tutorId,
                                          @Param("newFrom") LocalDateTime newFrom,
                                          @Param("newTo") LocalDateTime newTo);
+
+    List<TutorSlot> findAllByTutorIdAndFromDatetimeBetween(Long tutorId, LocalDateTime start, LocalDateTime end);
+
 }

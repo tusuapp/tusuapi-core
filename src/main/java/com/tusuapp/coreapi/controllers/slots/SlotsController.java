@@ -23,8 +23,8 @@ public class SlotsController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getSlots(@RequestParam Long tutorId){
-        return slotService.getTutorSlots(tutorId);
+    public ResponseEntity<?> getSlots(@RequestParam Long tutorId, @RequestParam String date){
+        return slotService.getTutorSlots(tutorId,date);
     }
 
 
