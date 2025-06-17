@@ -19,6 +19,8 @@ public class UserDto {
     private Role role;
     private boolean isEmailVerified;
     private String timeZoneOffset;
+
+
     public static UserDto fromUser(User user) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());

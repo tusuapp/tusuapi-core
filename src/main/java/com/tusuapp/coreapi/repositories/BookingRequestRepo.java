@@ -10,5 +10,6 @@ public interface BookingRequestRepo extends JpaRepository<BookingRequest,Long> {
     List<BookingRequest> findAllByTutorIdAndStatus(Long tutorId, String status);
     List<BookingRequest> findAllByStudentIdAndStatusIn(Long studentId, List<String> statusList);
     List<BookingRequest> findAllByTutorIdAndStatusIn(Long tutorId, List<String> statusList);
+    long countByStudentIdAndStatus(Long studentId, String status);
 
 }
