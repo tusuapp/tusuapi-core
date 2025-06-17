@@ -1,6 +1,5 @@
 package com.tusuapp.coreapi.models.dtos.accounts;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tusuapp.coreapi.models.User;
 import lombok.Data;
 
@@ -8,30 +7,18 @@ import lombok.Data;
 @Data
 public class UserDto {
 
-    @JsonProperty("id")
     private Long id;
-
-    @JsonProperty("username")
     private String username;
-
-    @JsonProperty("email")
     private String email;
-
-    @JsonProperty("phone")
     private Long phone;
-
-    @JsonProperty("country")
     private Integer country;
-
-    @JsonProperty("timezone")
     private String timeZone;
-
-    @JsonProperty("is_active")
     private Boolean isActive;
-
-    @JsonProperty("full_name")
     private String fullName;
-
+    private String imageUrl;
+    private Role role;
+    private boolean isEmailVerified;
+    private String timeZoneOffset;
     public static UserDto fromUser(User user) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());
@@ -42,6 +29,33 @@ public class UserDto {
         dto.setTimeZone(user.getTimeZone());
         dto.setFullName(user.getFullName());
         dto.setIsActive(user.getIsActive());
+        dto.setImageUrl(user.getImageUrl());
+        dto.setEmailVerified(user.getIsEmailVerified());
+        dto.setTimeZoneOffset(user.getTimeZoneOffset());
         return dto;
     }
+
+    @Data
+    public static class Role {
+        int id;
+        String name;
+        String type;
+
+        public Role(int code) {
+            if (code == 3) {
+                this.id = 3;
+                this.name
+                        = "Student";
+                this.type = "student";
+            }
+            if(code == 4){
+                this.id = 4;
+                this.name
+                        = "Tutor";
+                this.type = "tutor";
+            }
+        }
+
+    }
+
 }

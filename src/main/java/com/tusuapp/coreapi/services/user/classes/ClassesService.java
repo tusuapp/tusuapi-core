@@ -3,24 +3,19 @@ package com.tusuapp.coreapi.services.user.classes;
 import com.stripe.exception.StripeException;
 import com.tusuapp.coreapi.constants.BookingConstants;
 import com.tusuapp.coreapi.models.*;
-import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.bookings.BookingRequestDto;
 import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
 import com.tusuapp.coreapi.repositories.*;
 import com.tusuapp.coreapi.services.payments.stripe.StripeService;
 import jakarta.transaction.Transactional;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Book;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static com.tusuapp.coreapi.constants.BookingConstants.STATUS_CHECKOUT;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
@@ -50,11 +45,8 @@ public class ClassesService {
     @Autowired
     private StripeService stripeService;
 
-    public List<BookingRequest> getBookingRequests() {
-        return bookingRequestRepo.findAll();
-    }
 
-    public ResponseEntity<?> getMyClasses(String typesParam) {
+    public ResponseEntity<?> getUserClasses(String typesParam, Integer limit) {
         List<String> types = List.of(typesParam.split(","));
         Long currentId = getCurrentUserId();
 
@@ -67,10 +59,12 @@ public class ClassesService {
                     .findAllByTutorIdAndStatusIn(currentId, types);
         }
 
-        JSONObject response = new JSONObject();
-        response.put("bookings", requests.toArray());
-        return ResponseEntity.ok(response.toMap());
-
+        List<BookingRequestDto> dtos = requests.stream()
+                .map(BookingRequestDto::new).toList();
+        if(limit != null && dtos.size()>3){
+            dtos = dtos.subList(0, limit);
+        }
+        return ResponseEntity.ok(Map.of("bookings", dtos));
     }
 
     @Transactional
@@ -78,7 +72,7 @@ public class ClassesService {
         BookingRequest bookingRequest = bookingRequestRepo.findById(bookingRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("No Booking Found"));
         //Check if the user has enough balance
-        CredPointMaster creditPoint = creditPointRepo.findByStudentId(bookingRequest.getStudentId())
+        CredPointMaster creditPoint = creditPointRepo.findByStudentId(bookingRequest.getStudent().getId())
                 .orElseThrow(()-> new IllegalArgumentException("Credit point not found for student"));
         if(bookingRequest.getTotalAmount() > creditPoint.getBalance() ){
             double remainingCreditsRequired = bookingRequest.getTotalAmount() - creditPoint.getBalance();
@@ -106,15 +100,16 @@ public class ClassesService {
         //check if already time passed
         BookingRequest bookingRequest = new BookingRequest();
         bookingRequest.setCreatedAt(LocalDateTime.now());
-        bookingRequest.setStudentId(getCurrentUserId());
+        User student = userRepo.findById(getCurrentUserId()).orElseThrow(()->new IllegalArgumentException("Student not found"));
+        bookingRequest.setStudent(student);
         bookingRequest.setSlotId(initiateBookingReqDto.getSlot_id());
         bookingRequest.setSubjectId(initiateBookingReqDto.getSubject_id());
-        bookingRequest.setTutorId(tutorSlot.get().getTutorId());
-        System.out.println(bookingRequest.getTutorId());
+        User tutor = userRepo.findById(tutorSlot.get().getTutorId()).orElseThrow(()->new IllegalArgumentException("Student not found"));
+        bookingRequest.setTutor(tutor);
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         bookingRequest.setStartTime(LocalDateTime.parse(tutorSlot.get().getFromDatetime().toString(), formatter));
         bookingRequest.setEndTime(LocalDateTime.parse(tutorSlot.get().getToDatetime().toString(), formatter));
-        Optional<TutorDetails> tutorDetails = tutorDetailRepo.findByUserId(bookingRequest.getTutorId());
+        Optional<TutorDetails> tutorDetails = tutorDetailRepo.findByUserId(bookingRequest.getTutor().getId());
         System.out.println(tutorDetails.get().getId());
         bookingRequest.setHourlyCharge(tutorDetails.get().getHourlyCharge());
         bookingRequest.setStatus(STATUS_CHECKOUT);
@@ -123,26 +118,27 @@ public class ClassesService {
     }
 
     public ResponseEntity<?> getClassDetails(String id) {
-        Optional<BookingRequest> bookingRequestOpt = bookingRequestRepo.findById(Long.valueOf(id));
-        if (bookingRequestOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        BookingRequest bookingRequest = bookingRequestOpt.get();
-
-        if (Objects.equals(bookingRequest.getStudentId(), getCurrentUserId()) &&
-                Objects.equals(bookingRequest.getTutorId(), getCurrentUserId())) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Optional<User> studentDetails = userRepo.findById(bookingRequest.getStudentId());
-        Optional<User> tutorDetails = userRepo.findById(bookingRequest.getTutorId());
-        if (studentDetails.isEmpty() || tutorDetails.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tutor or student not exists, may be they have deactivated");
-        }
-        BookingRequestDto response = BookingRequestDto.fromBookingRequest(
-                bookingRequest,
-                UserDto.fromUser(studentDetails.get()),
-                UserDto.fromUser(tutorDetails.get()));
-        return ResponseEntity.ok(response);
+//        Optional<BookingRequest> bookingRequestOpt = bookingRequestRepo.findById(Long.valueOf(id));
+//        if (bookingRequestOpt.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+//        }
+//        BookingRequest bookingRequest = bookingRequestOpt.get();
+//
+//        if (Objects.equals(bookingRequest.getStudent().getId(), getCurrentUserId()) &&
+//                Objects.equals(bookingRequest.getTutorId(), getCurrentUserId())) {
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        Optional<User> studentDetails = userRepo.findById(bookingRequest.getStudentId());
+//        Optional<User> tutorDetails = userRepo.findById(bookingRequest.getTutorId());
+//        if (studentDetails.isEmpty() || tutorDetails.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tutor or student not exists, may be they have deactivated");
+//        }
+//        BookingRequestDto response = BookingRequestDto.fromBookingRequest(
+//                bookingRequest,
+//                UserDto.fromUser(studentDetails.get()),
+//                UserDto.fromUser(tutorDetails.get()));
+//        return ResponseEntity.ok(response);
+        return null;
     }
 }

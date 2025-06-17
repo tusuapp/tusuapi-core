@@ -175,7 +175,7 @@ public class StripeService {
                 creditService.addCredits(paymentSession.getStudentId(), paymentSession.getTotalAmount());
                 BookingRequest bookingRequest = bookingRequestRepo.findById(paymentSession.getBookingRequestId())
                         .orElseThrow(() -> new IllegalArgumentException("No booking request found for session"));
-                creditService.reduceCredits(bookingRequest.getStudentId(), bookingRequest.getTotalAmount());
+                creditService.reduceCredits(bookingRequest.getStudent().getId(), bookingRequest.getTotalAmount());
                 //book the class in the payment session
                 bookingRequest.setIsPaid(true);
                 bookingRequest.setStatus(BookingConstants.STATUS_REQUESTED);

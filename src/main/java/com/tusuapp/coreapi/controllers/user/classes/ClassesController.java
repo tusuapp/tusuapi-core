@@ -1,8 +1,6 @@
 package com.tusuapp.coreapi.controllers.user.classes;
 
 
-import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
-import com.tusuapp.coreapi.models.dtos.payments.MakePaymentDto;
 import com.tusuapp.coreapi.services.user.classes.ClassesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,21 +14,11 @@ public class ClassesController {
     @Autowired
     private ClassesService classesService;
 
-    @GetMapping("/upcoming")
-    public ResponseEntity<?> getUpcomingClasses(){
-        return ResponseEntity.ok().build();
+
+    @GetMapping
+    public ResponseEntity<?> getUserBookings(@RequestParam String types, @RequestParam Integer limit){
+        return classesService.getUserClasses(types,limit);
     }
 
-
-
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getBookingDetails(@PathVariable String id){
-        return classesService.getClassDetails(id);
-    }
-
-    public ResponseEntity<?> makePayment(@RequestBody MakePaymentDto makePaymentDto){
-        return null;
-    }
 
 }

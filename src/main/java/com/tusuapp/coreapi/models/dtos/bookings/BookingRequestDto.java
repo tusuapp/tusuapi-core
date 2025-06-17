@@ -10,53 +10,45 @@ import java.time.LocalDateTime;
 @Data
 public class BookingRequestDto {
 
-    @JsonProperty("id")
     private Long id;
-
-    @JsonProperty("student")
     private UserDto student;
-
-    @JsonProperty("tutor")
     private UserDto tutor;
-
-    @JsonProperty("subject_id")
     private Long subjectId;
-
-    @JsonProperty("start_time")
     private LocalDateTime startTime;
-
-    @JsonProperty("end_time")
     private LocalDateTime endTime;
-
-    @JsonProperty("status")
     private String status;
-
-    @JsonProperty("is_rescheduled")
     private boolean isRescheduled;
-
-    @JsonProperty("parent_booking_id")
     private Long parentBookingId;
-
-    @JsonProperty("reschedule_reason")
     private String rescheduleReason;
-
-    @JsonProperty("rescheduled_at")
     private LocalDateTime rescheduledAt;
-
-    @JsonProperty("is_paid")
     private boolean isPaid;
-
-    @JsonProperty("transaction_id")
     private String transactionId;
-
-    @JsonProperty("created_at")
     private LocalDateTime createdAt;
-
-    @JsonProperty("updated_at")
     private LocalDateTime updatedAt;
-
-    @JsonProperty("slot_id")
     private Long slotId;
+
+    public BookingRequestDto() {
+
+    }
+
+    public BookingRequestDto(BookingRequest request) {
+        this.id = request.getId();
+        this.subjectId = request.getSubjectId();
+        this.startTime = request.getStartTime();
+        this.endTime = request.getEndTime();
+        this.status = request.getStatus();
+        this.isRescheduled = request.getIsRescheduled();
+        this.parentBookingId = request.getParentBookingId();
+        this.rescheduleReason = request.getRescheduleReason();
+        this.rescheduledAt = request.getRescheduledAt();
+        this.isPaid = request.getIsPaid();
+        this.transactionId = request.getTransactionId();
+        this.createdAt = request.getCreatedAt();
+        this.updatedAt = request.getUpdatedAt();
+        this.slotId = request.getSlotId();
+        this.student = UserDto.fromUser(request.getStudent());
+        this.tutor = UserDto.fromUser(request.getTutor());
+    }
 
     public static BookingRequestDto fromBookingRequest(BookingRequest request, UserDto student, UserDto tutor) {
         BookingRequestDto dto = new BookingRequestDto();

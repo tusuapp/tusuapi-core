@@ -19,11 +19,14 @@ public class BookingRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "student_id")
-    private Long studentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", insertable = false, updatable = false)
+    private User student;
 
-    @Column(name = "tutor_id")
-    private Long tutorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tutor_id", insertable = false, updatable = false)
+    private User tutor;
+
 
     @Column(name = "subject_id")
     private Long subjectId;

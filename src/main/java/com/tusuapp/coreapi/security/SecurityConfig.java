@@ -27,33 +27,32 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
 
     // Constructor injection for required dependencies
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, 
-                         UserDetailsService userDetailsService) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter,
+                          UserDetailsService userDetailsService) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
     }
 
-    /* 
+    /*
      * Main security configuration
      * Defines endpoint access rules and JWT filter setup
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers( "/home","/auth/welcome", "/auth/addNewUser", "/error").permitAll()
-                .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
-                .requestMatchers("/auth/admin/**").hasAuthority("ROLE_ADMIN")
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/home", "/auth/welcome", "/auth/addNewUser", "/error").permitAll()
+                        .requestMatchers("/user/classes/tutor/bookings/**").hasAuthority("ROLE_TUTOR")
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-    /* 
+    /*
      * Password encoder bean (uses BCrypt hashing)
      * Critical for secure password storage
      */
@@ -62,7 +61,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /* 
+    /*
      * Authentication provider configuration
      * Links UserDetailsService and PasswordEncoder
      */
@@ -74,7 +73,7 @@ public class SecurityConfig {
         return provider;
     }
 
-    /* 
+    /*
      * Authentication manager bean
      * Required for programmatic authentication (e.g., in /generateToken)
      */
