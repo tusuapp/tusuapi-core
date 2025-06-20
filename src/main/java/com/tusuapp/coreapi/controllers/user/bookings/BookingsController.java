@@ -1,9 +1,11 @@
 package com.tusuapp.coreapi.controllers.user.bookings;
 
 import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
+import com.tusuapp.coreapi.models.dtos.bookings.RejectBookingDto;
 import com.tusuapp.coreapi.services.user.bookings.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -44,6 +46,12 @@ public class BookingsController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getBookingDetails(@PathVariable("id") Long id){
         return bookingService.getBookingDetails(id);
+    }
+
+    @PutMapping("/reject")
+    @PreAuthorize("hasRole('ROLE_TUTOR')")
+    public ResponseEntity<?> rejectClass(@RequestBody RejectBookingDto rejectDto){
+        return bookingService.rejectBooking(rejectDto);
     }
 
 

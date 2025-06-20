@@ -2,6 +2,7 @@ package com.tusuapp.coreapi.models.dtos.bookings;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tusuapp.coreapi.models.BookingRequest;
+import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import lombok.Data;
 
@@ -60,6 +61,29 @@ public class BookingRequestDto {
         dto.setId(request.getId());
         dto.setStudent(student);
         dto.setTutor(tutor);
+        dto.setSubjectId(request.getSubjectId());
+        dto.setStartTime(request.getStartTime());
+        dto.setEndTime(request.getEndTime());
+        dto.setStatus(request.getStatus());
+        dto.setRescheduled(request.getIsRescheduled());
+        dto.setParentBookingId(request.getParentBookingId());
+        dto.setRescheduleReason(request.getRescheduleReason());
+        dto.setRescheduledAt(request.getRescheduledAt());
+        dto.setPaid(request.getIsPaid());
+        dto.setTransactionId(request.getTransactionId());
+        dto.setCreatedAt(request.getCreatedAt());
+        dto.setUpdatedAt(request.getUpdatedAt());
+        dto.setSlotId(request.getSlotId());
+        dto.setHourlyFee(request.getHourlyCharge());
+        dto.setTotalAmount(request.getTotalAmount());
+        return dto;
+    }
+
+    public static BookingRequestDto fromBookingRequest(BookingRequest request) {
+        BookingRequestDto dto = new BookingRequestDto();
+        dto.setId(request.getId());
+        dto.setStudent(UserDto.fromUser(request.getStudent()));
+        dto.setTutor(UserDto.fromUser(request.getTutor()));
         dto.setSubjectId(request.getSubjectId());
         dto.setStartTime(request.getStartTime());
         dto.setEndTime(request.getEndTime());

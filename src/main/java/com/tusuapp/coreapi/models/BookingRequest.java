@@ -49,6 +49,12 @@ public class BookingRequest {
     @Column(name = "reschedule_reason", columnDefinition = "TEXT")
     private String rescheduleReason;
 
+    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    private String rejectionReason;
+
+    @Column(name = "student_message", columnDefinition = "TEXT")
+    private String studentMessage;
+
     @Column(name = "rescheduled_at")
     private LocalDateTime rescheduledAt;
 

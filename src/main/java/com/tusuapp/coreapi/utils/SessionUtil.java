@@ -35,4 +35,17 @@ public class SessionUtil {
         return item.get().equals("ROLE_STUDENT");
     }
 
+    public static boolean isTutor() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return true;
+        }
+
+        Optional<String> item = authentication.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst();
+        return item.get().equals("ROLE_TUTOR");
+    }
+
 }

@@ -4,6 +4,7 @@ package com.tusuapp.coreapi.utils.converters;
 import com.tusuapp.coreapi.models.BookingRequest;
 import com.tusuapp.coreapi.models.TutorSlot;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -43,6 +44,10 @@ public class TimeZoneConverter {
         ZonedDateTime zonedDateTime = tzDateTime.atZone(targetZone);
         ZonedDateTime utcZoned = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
         return utcZoned.toLocalDateTime();
+    }
+
+    public static LocalDateTime getCurrentUTCTime() {
+        return LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"));
     }
 
 }

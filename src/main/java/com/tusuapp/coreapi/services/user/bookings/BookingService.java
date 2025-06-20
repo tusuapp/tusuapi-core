@@ -6,6 +6,7 @@ import com.tusuapp.coreapi.models.*;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.bookings.BookingRequestDto;
 import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
+import com.tusuapp.coreapi.models.dtos.bookings.RejectBookingDto;
 import com.tusuapp.coreapi.repositories.*;
 import com.tusuapp.coreapi.services.payments.stripe.StripeService;
 import com.tusuapp.coreapi.services.user.CreditService;
@@ -38,7 +39,7 @@ public class BookingService {
     private TutorSlotRepo tutorSlotRepo;
 
     @Autowired
-    private BookingRequestRepo bookingRequestRepo;
+    private BookingRequestRepo bookingRepo;
 
     @Autowired
     private UserInfoRepo userRepo;
@@ -62,10 +63,10 @@ public class BookingService {
 
         List<BookingRequest> requests;
         if (isStudent()) {
-            requests = bookingRequestRepo
+            requests = bookingRepo
                     .findAllByStudentIdAndStatusIn(currentId, types);
         } else {
-            requests = bookingRequestRepo
+            requests = bookingRepo
                     .findAllByTutorIdAndStatusIn(currentId, types);
         }
 
@@ -79,7 +80,7 @@ public class BookingService {
 
     @Transactional
     public ResponseEntity<?> purchaseClass(Long bookingRequestId) throws StripeException {
-        BookingRequest bookingRequest = bookingRequestRepo.findById(bookingRequestId)
+        BookingRequest bookingRequest = bookingRepo.findById(bookingRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("No Booking Found"));
         if (!creditService.currentUserHasEnoughCredit(bookingRequest.getTotalAmount())) {
             double remainingCreditsRequired = bookingRequest.getTotalAmount() - creditService.getCurrentUserBalance();
@@ -92,7 +93,7 @@ public class BookingService {
         tutorSlot.setIsBooked(true);
         creditService.reduceCredits(bookingRequest.getStudent().getId(),bookingRequest.getTotalAmount());
         tutorSlotRepo.save(tutorSlot);
-        bookingRequest = bookingRequestRepo.save(bookingRequest);
+        bookingRequest = bookingRepo.save(bookingRequest);
         return ResponseEntity.ok(new BookingRequestDto(bookingRequest));
     }
 
@@ -121,12 +122,12 @@ public class BookingService {
         System.out.println(tutorDetails.get().getId());
         bookingRequest.setHourlyCharge(tutorDetails.get().getHourlyCharge());
         bookingRequest.setStatus(STATUS_CHECKOUT);
-        bookingRequest = bookingRequestRepo.save(bookingRequest);
+        bookingRequest = bookingRepo.save(bookingRequest);
         return ResponseEntity.ok(bookingRequest);
     }
 
     public ResponseEntity<?> getBookingDetails(Long id) {
-        Optional<BookingRequest> bookingRequestOpt = bookingRequestRepo.findById(id);
+        Optional<BookingRequest> bookingRequestOpt = bookingRepo.findById(id);
         if (bookingRequestOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -153,4 +154,15 @@ public class BookingService {
         return null;
     }
 
+    public ResponseEntity<?> rejectBooking(RejectBookingDto rejectDto) {
+        BookingRequest request = bookingRepo.findById(rejectDto.getBookingId())
+                .orElseThrow(()->new IllegalArgumentException("No booking found"));
+        if(!request.getTutor().getId().equals(getCurrentUserId())){
+            return ResponseEntity.notFound().build();
+        }
+        request.setStatus(BookingConstants.STATUS_REJECTED);
+        request.setRejectionReason(rejectDto.getMessage());
+        request = bookingRepo.save(request);
+        return ResponseEntity.ok(BookingRequestDto.fromBookingRequest(request));
+    }
 }

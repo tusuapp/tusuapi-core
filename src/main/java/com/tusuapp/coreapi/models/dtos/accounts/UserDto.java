@@ -19,6 +19,7 @@ public class UserDto {
     private Role role;
     private boolean isEmailVerified;
     private String timeZoneOffset;
+    private boolean isCompleteProfile;
 
 
     public static UserDto fromUser(User user) {
@@ -36,6 +37,7 @@ public class UserDto {
         dto.setTimeZoneOffset(user.getTimeZoneOffset());
         return dto;
     }
+
 
     @Data
     public static class Role {
