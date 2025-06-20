@@ -1,4 +1,4 @@
-package com.tusuapp.coreapi.services.user.classes;
+package com.tusuapp.coreapi.services.user.bookings;
 
 import com.stripe.exception.StripeException;
 import com.tusuapp.coreapi.constants.BookingConstants;
@@ -26,12 +26,13 @@ import static com.tusuapp.coreapi.constants.BookingConstants.STATUS_CHECKOUT;
 import static com.tusuapp.coreapi.utils.ResponseUtil.errorResponse;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 import static com.tusuapp.coreapi.utils.SessionUtil.isStudent;
+import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.transformBookingReqFromUTC;
 
 /**
  * ClassesService created by Rithik S(coderithik@gmail.com)
  **/
 @Service
-public class ClassesService {
+public class BookingService {
 
     @Autowired
     private TutorSlotRepo tutorSlotRepo;
@@ -139,10 +140,17 @@ public class ClassesService {
         if (studentDetails.isEmpty() || tutorDetails.isEmpty()) {
             return errorResponse(HttpStatus.BAD_REQUEST, "Student or tutor might be deactivated");
         }
+        transformBookingReqFromUTC(bookingRequest);
         BookingRequestDto response = BookingRequestDto.fromBookingRequest(
                 bookingRequest,
                 UserDto.fromUser(studentDetails.get()),
                 UserDto.fromUser(tutorDetails.get()));
         return ResponseEntity.ok(response);
     }
+
+
+    public ResponseEntity<?> cancelBooking(Long bookingId){
+        return null;
+    }
+
 }

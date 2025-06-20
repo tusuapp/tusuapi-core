@@ -23,7 +23,6 @@ public class SessionUtil {
 
     public static boolean isStudent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication == null || authentication.getAuthorities() == null) {
             return true;
         }
@@ -33,7 +32,7 @@ public class SessionUtil {
                 .map(GrantedAuthority::getAuthority)
                 .findFirst();
         System.out.println(item.get());
-        return true;
+        return item.get().equals("ROLE_STUDENT");
     }
 
 }

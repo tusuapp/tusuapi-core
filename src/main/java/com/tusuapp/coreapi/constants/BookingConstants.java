@@ -9,4 +9,8 @@ public class BookingConstants {
     public static final String STATUS_COMPLETED = "completed";
     public static final String STATUS_CANCELLED = "cancelled";
     public static final String STATUS_REQUESTED = "requested";
+    public static final String STATUS_AUTO_CANCELLED = "auto-cancelled";
+    public static final String STATUS_ABANDONED = "abandoned";
+    public static final String STATUS_INPROGRESS = "in-progress";
+
 }

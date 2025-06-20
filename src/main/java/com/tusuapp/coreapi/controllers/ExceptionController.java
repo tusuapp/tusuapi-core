@@ -12,19 +12,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ExceptionController {
 
-//    @ExceptionHandler(SignatureException.class)
-//    public ResponseEntity<String> handleSignatureException(SignatureException ex) {
-//        System.out.println("handleSignatureException");
-//        return ResponseEntity
-//                .status(HttpStatus.UNAUTHORIZED)
-//                .body("Invalid or expired JWT token");
-//    }
-//
-//    @ExceptionHandler(MissingServletRequestParameterException.class)
-//    public ResponseEntity<?> handleMissingParam(MissingServletRequestParameterException e){
-//        JSONObject response = new JSONObject();
-//        response.put("error",e.getMessage());
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.toMap());
-//    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException e) {
+        JSONObject response = new JSONObject();
+        response.put("error", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.toMap());
+    }
+
 
 }

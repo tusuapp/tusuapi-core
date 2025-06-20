@@ -1,6 +1,7 @@
 package com.tusuapp.coreapi.utils.converters;
 
 
+import com.tusuapp.coreapi.models.BookingRequest;
 import com.tusuapp.coreapi.models.TutorSlot;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,11 @@ public class TimeZoneConverter {
     public static void transformTutorSlotFromUTC(TutorSlot slot) {
         slot.setFromDatetime(getLocalDateTime(slot.getFromDatetime()));
         slot.setToDatetime(getLocalDateTime(slot.getToDatetime()));
+    }
+
+    public static void transformBookingReqFromUTC(BookingRequest slot) {
+        slot.setStartTime(getLocalDateTime(slot.getStartTime()));
+        slot.setEndTime(getLocalDateTime(slot.getEndTime()));
     }
 
     private static LocalDateTime getLocalDateTime(LocalDateTime utcTime) {

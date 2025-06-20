@@ -1,11 +1,13 @@
 package com.tusuapp.coreapi.controllers.user.classes;
 
 
-import com.tusuapp.coreapi.services.user.classes.ClassesService;
-import jakarta.websocket.server.PathParam;
+import com.tusuapp.coreapi.services.user.classes.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/user/classes")
@@ -13,18 +15,14 @@ public class ClassesController {
 
 
     @Autowired
-    private ClassesService classesService;
+    private ClassService classService;
 
 
-    @GetMapping
-    public ResponseEntity<?> getUserBookings(@RequestParam String types, @RequestParam(required = false) Integer limit){
-        return classesService.getUserClasses(types,limit);
+    @PostMapping("/start")
+    public ResponseEntity<?> startClass(@RequestParam("bookingId") Long bookingId) throws Exception {
+        return classService.startClass(bookingId);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getBookingDetails(@PathVariable("id") Long id){
-        return classesService.getBookingDetails(id);
-    }
 
 
 }
