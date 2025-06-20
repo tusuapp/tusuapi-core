@@ -53,7 +53,7 @@ public class AutoRequestCanceller {
 //        System.out.println("Found " + requests.size() + " requests to be cancelled");
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 60 * 1000)
     public void autoCreateBookingSession() {
         LocalDateTime utcTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"));
         List<BookingRequest> requests = bookingRequestRepo.findAllAcceptedBookingsWithinNext15Minutes(utcTime,utcTime.plusMinutes(15));
