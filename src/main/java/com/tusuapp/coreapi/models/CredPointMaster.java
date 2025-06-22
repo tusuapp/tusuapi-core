@@ -18,7 +18,7 @@ public class CredPointMaster {
     private Integer id;
 
     @Column(nullable = false, name = "uid")
-    private Long studentId;
+    private Long userId;
 
     @Column(nullable = false)
     private double balance;

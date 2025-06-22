@@ -2,7 +2,6 @@ package com.tusuapp.coreapi.services.user;
 
 import com.tusuapp.coreapi.models.CredPointMaster;
 import com.tusuapp.coreapi.repositories.CreditPointRepo;
-import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
-import static com.tusuapp.coreapi.utils.SessionUtil.isStudent;
 
 
 @Service
@@ -22,7 +20,7 @@ public class CreditService {
     public boolean currentUserHasEnoughCredit(Double amount) {
         try {
             System.out.println("currentUserHasEnoughCredit user " + getCurrentUserId());
-            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByStudentId(getCurrentUserId());
+            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByUserId(getCurrentUserId());
             if (creditPointOptional.isEmpty()) {
                 creditPointRepo.save(getNewCreditPoint(getCurrentUserId(), 0.0));
                 return false;
@@ -38,7 +36,7 @@ public class CreditService {
     public Double getCurrentUserBalance() {
         try {
             System.out.println("currentUserHasEnoughCredit user " + getCurrentUserId());
-            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByStudentId(getCurrentUserId());
+            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByUserId(getCurrentUserId());
             if (creditPointOptional.isEmpty()) {
                 creditPointRepo.save(getNewCreditPoint(getCurrentUserId(), 0.0));
                 return 0.0;
@@ -52,14 +50,18 @@ public class CreditService {
 
     public boolean addCredits(Long studentId, Double amount) {
         try {
-            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByStudentId(studentId);
+            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByUserId(studentId);
             if (creditPointOptional.isEmpty()) {
                 creditPointRepo.save(getNewCreditPoint(studentId, amount));
                 return true;
             }
             CredPointMaster creditPoint = creditPointOptional.get();
             creditPoint.setBalance(creditPoint.getBalance() + amount);
-            creditPoint.setUpdatedBy(getCurrentUserId());
+            try {
+                creditPoint.setUpdatedBy(getCurrentUserId());
+            } catch (Exception e) {
+                creditPoint.setUpdatedBy(-3L);
+            }
             creditPoint.setUpdatedAt(LocalDateTime.now());
             creditPointRepo.save(creditPoint);
             return true;
@@ -69,9 +71,10 @@ public class CreditService {
         }
     }
 
+
     public boolean reduceCredits(Long studentId, Double amount) {
         try {
-            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByStudentId(studentId);
+            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByUserId(studentId);
             if (creditPointOptional.isEmpty()) {
                 creditPointRepo.save(getNewCreditPoint(studentId, 0.0));
                 throw new IllegalArgumentException("No credit to reduce");
@@ -93,7 +96,7 @@ public class CreditService {
 
     private CredPointMaster getNewCreditPoint(Long studentId, Double amount) {
         CredPointMaster creditPoint = new CredPointMaster();
-        creditPoint.setStudentId(studentId);
+        creditPoint.setUserId(studentId);
         creditPoint.setBalance(amount);
         creditPoint.setCreatedAt(LocalDateTime.now());
         creditPoint.setUpdatedBy(getCurrentUserId());

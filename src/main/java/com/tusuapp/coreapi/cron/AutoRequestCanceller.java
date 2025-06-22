@@ -18,7 +18,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.getCurrentUTCTime;
 import static org.hibernate.internal.util.collections.CollectionHelper.listOf;
 
 @Component
@@ -42,15 +45,9 @@ public class AutoRequestCanceller {
 
     @Scheduled(fixedDelay = 1000)
     public void autoCancelRequested() {
-        //Credit back the points
-        //Change status to auto-cancelled
-        //save
-//        System.out.println("CRON JOB");
         List<String> statues = listOf("requested", "rescheduled");
         LocalDateTime utcTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"));
-//        System.out.println(utcTime);
         List<BookingRequest> requests = bookingRequestRepo.findAllByStartTimeBeforeAndStatusIn(utcTime, statues);
-//        System.out.println("Found " + requests.size() + " requests to be cancelled");
     }
 
     @Scheduled(fixedDelay = 10 * 1000)
@@ -60,6 +57,16 @@ public class AutoRequestCanceller {
         List<BookingSession> sessions = startSessions(requests);
         System.out.println("Started " + sessions.size() + " sessions");
     }
+
+    @Scheduled(fixedDelay = 13 * 1000)
+    public void autoCompleteBookingSession() {
+        List<BookingRequest> requests = bookingRequestRepo.findAllByStatusAndEndTimeLessThanEqual(BookingConstants.STATUS_INPROGRESS,getCurrentUTCTime());
+        stopSessions(requests);
+        System.out.println("Stopped " + requests.size() + " sessions");
+    }
+
+
+
 
     public List<BookingSession> startSessions(List<BookingRequest> bookingRequests) {
         List<BookingSession> newSessions = new ArrayList<>();
@@ -78,5 +85,14 @@ public class AutoRequestCanceller {
         }
         return newSessions;
     }
+
+    public void stopSessions(List<BookingRequest> requests) {
+        requests.forEach((r)->{
+            r.setStatus(BookingConstants.STATUS_COMPLETED);
+            creditService.addCredits(r.getTutor().getId(),r.getHourlyCharge());
+        });
+        bookingRequestRepo.saveAll(requests);
+    }
+
 
 }

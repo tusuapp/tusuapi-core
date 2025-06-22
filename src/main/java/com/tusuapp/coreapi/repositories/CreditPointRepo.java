@@ -9,5 +9,5 @@ import javax.swing.text.html.Option;
 import java.util.Optional;
 
 public interface CreditPointRepo extends JpaRepository<CredPointMaster,Long> {
-    Optional<CredPointMaster> findByStudentId(Long studentId);
+    Optional<CredPointMaster> findByUserId(Long studentId);
 }
