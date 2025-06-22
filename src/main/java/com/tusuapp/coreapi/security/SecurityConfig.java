@@ -48,7 +48,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/**", "/home", "/error").permitAll()
+                        .requestMatchers( "/home", "/error").permitAll()
                         .requestMatchers("/user/classes/tutor/bookings/**").hasRole("TUTOR")
                         .anyRequest().authenticated()
                 )
