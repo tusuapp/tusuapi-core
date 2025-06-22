@@ -31,9 +31,9 @@ public class DashboardService {
         List<BookingRequestDto> requestsDto = requestList.stream().map(BookingRequestDto::fromBookingRequest).toList();
         response.put("bookingRequests", requestsDto);
         List<BookingRequest> upcomingAccepted = bookingsRepo
-                .findByTutorIdAndStatusAndStartTimeAfterOrderByStartTimeAsc(
+                .findByTutorIdAndStatusInAndStartTimeAfterOrderByStartTimeAsc(
                         tutorId,
-                        BookingConstants.STATUS_ACCEPTED,
+                        listOf(BookingConstants.STATUS_ACCEPTED,BookingConstants.STATUS_INPROGRESS),
                         getCurrentUTCTime()
                 );
         List<BookingRequestDto> upcomingDto = upcomingAccepted.stream().map(BookingRequestDto::fromBookingRequest).toList();

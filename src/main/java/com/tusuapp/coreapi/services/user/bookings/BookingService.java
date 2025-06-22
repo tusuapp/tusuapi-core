@@ -6,7 +6,7 @@ import com.tusuapp.coreapi.models.*;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.bookings.BookingRequestDto;
 import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
-import com.tusuapp.coreapi.models.dtos.bookings.RejectBookingDto;
+import com.tusuapp.coreapi.models.dtos.bookings.ChangeBookingStatusDto;
 import com.tusuapp.coreapi.repositories.*;
 import com.tusuapp.coreapi.services.payments.stripe.StripeService;
 import com.tusuapp.coreapi.services.user.CreditService;
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.tusuapp.coreapi.constants.BookingConstants.STATUS_CHECKOUT;
+import static com.tusuapp.coreapi.constants.BookingConstants.*;
 import static com.tusuapp.coreapi.utils.ResponseUtil.errorResponse;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 import static com.tusuapp.coreapi.utils.SessionUtil.isStudent;
@@ -88,11 +88,7 @@ public class BookingService {
         }
         bookingRequest.setStatus(BookingConstants.STATUS_REQUESTED);
         bookingRequest.setIsPaid(true);
-        TutorSlot tutorSlot = tutorSlotRepo.findById(bookingRequest.getSlotId())
-                .orElseThrow(() -> new IllegalArgumentException("Tutor slot no longer exists"));
-        tutorSlot.setIsBooked(true);
         creditService.reduceCredits(bookingRequest.getStudent().getId(),bookingRequest.getTotalAmount());
-        tutorSlotRepo.save(tutorSlot);
         bookingRequest = bookingRepo.save(bookingRequest);
         return ResponseEntity.ok(new BookingRequestDto(bookingRequest));
     }
@@ -149,20 +145,31 @@ public class BookingService {
         return ResponseEntity.ok(response);
     }
 
-
-    public ResponseEntity<?> cancelBooking(Long bookingId){
-        return null;
-    }
-
-    public ResponseEntity<?> rejectBooking(RejectBookingDto rejectDto) {
-        BookingRequest request = bookingRepo.findById(rejectDto.getBookingId())
+    public ResponseEntity<?> changeBookingStatus(ChangeBookingStatusDto changeStatusDto) {
+        BookingRequest request = bookingRepo.findById(changeStatusDto.getBookingId())
                 .orElseThrow(()->new IllegalArgumentException("No booking found"));
         if(!request.getTutor().getId().equals(getCurrentUserId())){
             return ResponseEntity.notFound().build();
         }
-        request.setStatus(BookingConstants.STATUS_REJECTED);
-        request.setRejectionReason(rejectDto.getMessage());
+        switch (changeStatusDto.getStatus()){
+            case STATUS_REJECTED -> rejectBooking(request, changeStatusDto);
+            case STATUS_ACCEPTED -> acceptBooking(request,changeStatusDto);
+            default -> throw new IllegalArgumentException("Invalid status");
+        }
         request = bookingRepo.save(request);
         return ResponseEntity.ok(BookingRequestDto.fromBookingRequest(request));
+    }
+
+    private void acceptBooking(BookingRequest request, ChangeBookingStatusDto changeStatusDto) {
+        request.setStatus(STATUS_ACCEPTED);
+        TutorSlot tutorSlot = tutorSlotRepo.findById(request.getSlotId())
+                .orElseThrow(() -> new IllegalArgumentException("Tutor slot no longer exists"));
+        tutorSlot.setIsBooked(true);
+        tutorSlotRepo.save(tutorSlot);
+    }
+
+    private void rejectBooking(BookingRequest request, ChangeBookingStatusDto changeStatusDto) {
+        request.setStatus(STATUS_REJECTED);
+        request.setRejectionReason(changeStatusDto.getMessage());
     }
 }

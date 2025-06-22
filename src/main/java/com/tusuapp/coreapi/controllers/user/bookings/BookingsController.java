@@ -1,7 +1,7 @@
 package com.tusuapp.coreapi.controllers.user.bookings;
 
 import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
-import com.tusuapp.coreapi.models.dtos.bookings.RejectBookingDto;
+import com.tusuapp.coreapi.models.dtos.bookings.ChangeBookingStatusDto;
 import com.tusuapp.coreapi.services.user.bookings.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -48,10 +48,10 @@ public class BookingsController {
         return bookingService.getBookingDetails(id);
     }
 
-    @PutMapping("/reject")
+    @PutMapping("/status")
     @PreAuthorize("hasRole('ROLE_TUTOR')")
-    public ResponseEntity<?> rejectClass(@RequestBody RejectBookingDto rejectDto){
-        return bookingService.rejectBooking(rejectDto);
+    public ResponseEntity<?> rejectClass(@RequestBody ChangeBookingStatusDto statusDto){
+        return bookingService.changeBookingStatus(statusDto);
     }
 
 

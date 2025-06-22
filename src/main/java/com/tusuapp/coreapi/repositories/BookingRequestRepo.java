@@ -19,6 +19,6 @@ public interface BookingRequestRepo extends JpaRepository<BookingRequest,Long> {
     List<BookingRequest> findAllByStartTimeBeforeAndStatusIn(LocalDateTime time, List<String> statuses);
     @Query("SELECT b FROM BookingRequest b WHERE b.status = 'accepted' AND b.startTime BETWEEN :now AND :nowPlus15")
     List<BookingRequest> findAllAcceptedBookingsWithinNext15Minutes(@Param("now") LocalDateTime now, @Param("nowPlus15") LocalDateTime nowPlus15);
-    List<BookingRequest> findByTutorIdAndStatusAndStartTimeAfterOrderByStartTimeAsc(Long tutorId, String status, LocalDateTime startTime);
+    List<BookingRequest> findByTutorIdAndStatusInAndStartTimeAfterOrderByStartTimeAsc(Long tutorId, List<String> statuses, LocalDateTime startTime);
 
 }
