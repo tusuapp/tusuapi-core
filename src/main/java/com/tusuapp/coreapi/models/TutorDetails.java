@@ -2,10 +2,12 @@ package com.tusuapp.coreapi.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.cglib.core.Local;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -40,4 +42,30 @@ public class TutorDetails {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+
+    @ManyToMany
+    @JoinTable(
+            name = "categories_tutor_details__tutor_details_subject_ids",
+            joinColumns = @JoinColumn(name = "tutor-detail_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private List<Category> subjects;
+
+    @ManyToMany
+    @JoinTable(
+            name = "categories_tutor_details_ds__tutor_details_discipline_ids",
+            joinColumns = @JoinColumn(name = "tutor-detail_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private List<Category> disciplines;
+
+    @ManyToMany
+    @JoinTable(
+            name = "locales_tutor_details__tutor_details_languages",
+            joinColumns = @JoinColumn(name = "tutor-detail_id"),
+            inverseJoinColumns = @JoinColumn(name = "locale_id")
+    )
+    private List<Locale> languages;
+
 }

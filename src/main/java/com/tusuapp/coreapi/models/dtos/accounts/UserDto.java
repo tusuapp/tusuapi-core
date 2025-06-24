@@ -1,6 +1,8 @@
 package com.tusuapp.coreapi.models.dtos.accounts;
 
+import com.tusuapp.coreapi.models.Country;
 import com.tusuapp.coreapi.models.User;
+import com.tusuapp.coreapi.models.dtos.CountryDto;
 import lombok.Data;
 
 
@@ -11,7 +13,7 @@ public class UserDto {
     private String username;
     private String email;
     private Long phone;
-    private Integer country;
+    private CountryDto country;
     private String timeZone;
     private Boolean isActive;
     private String fullName;
@@ -20,6 +22,8 @@ public class UserDto {
     private boolean isEmailVerified;
     private String timeZoneOffset;
     private boolean isCompleteProfile;
+    private String address;
+
 
 
     public static UserDto fromUser(User user) {
@@ -28,13 +32,14 @@ public class UserDto {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
-        dto.setCountry(user.getCountry());
+        dto.setCountry(CountryDto.fromCountry(user.getCountry()));
         dto.setTimeZone(user.getTimeZone());
         dto.setFullName(user.getFullName());
         dto.setIsActive(user.getIsActive());
         dto.setImageUrl(user.getImageUrl());
         dto.setEmailVerified(user.getIsEmailVerified());
         dto.setTimeZoneOffset(user.getTimeZoneOffset());
+        dto.setAddress(user.getAddress());
         return dto;
     }
 

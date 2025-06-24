@@ -28,7 +28,11 @@ public class User {
     private Boolean isMobileVerified;
     @Column(name = "fullname")
     private String fullName;
-    private Integer country;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country", referencedColumnName = "id")
+    private Country country;
+
     @Column(name = "tutor_details")
     private Integer tutorDetails;
     @Column(name = "timezone")

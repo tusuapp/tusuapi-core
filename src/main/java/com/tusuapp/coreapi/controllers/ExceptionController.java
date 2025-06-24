@@ -16,6 +16,7 @@ public class ExceptionController {
     public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException e) {
         JSONObject response = new JSONObject();
         response.put("error", e.getMessage());
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.toMap());
     }
 
