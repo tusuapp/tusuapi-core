@@ -11,6 +11,7 @@ import com.tusuapp.coreapi.repositories.BookingRequestRepo;
 import com.tusuapp.coreapi.repositories.PaymentSessionRepo;
 import com.tusuapp.coreapi.repositories.UserInfoRepo;
 import com.tusuapp.coreapi.services.user.CreditService;
+import com.tusuapp.coreapi.services.user.notifications.NotificationService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,13 +36,14 @@ public class StripeService {
     @Autowired
     private PaymentSessionRepo paymentSessionRepo;
 
-
     @Autowired
     private UserInfoRepo userInfoRepo;
 
     @Autowired
     private BookingRequestRepo bookingRequestRepo;
 
+    @Autowired
+    private NotificationService notificationService;
 
     String clientBaseURL = "https://tusuapp.com/student/payment";
 
@@ -105,7 +107,7 @@ public class StripeService {
         paymentSession.setTotalAmount(Double.valueOf(amount.toString()));
         //TODO set tutor id also
 
-        if(purchaseType.equals(TRANSACTION_TYPE_REMAINING_BUY)){
+        if (purchaseType.equals(TRANSACTION_TYPE_REMAINING_BUY)) {
             paymentSession.setBookingRequestId(Long.valueOf(metadata.get("booking_id")));
         }
         paymentSession.setStudentId(getCurrentUserId());
@@ -179,9 +181,11 @@ public class StripeService {
                 bookingRequest.setIsPaid(true);
                 bookingRequest.setStatus(BookingConstants.STATUS_REQUESTED);
                 bookingRequest = bookingRequestRepo.save(bookingRequest);
-                response.put("bookingRequest",bookingRequest);
+                response.put("bookingRequest", bookingRequest);
                 markPaymentSessionAsPaid(paymentSession);
+                notificationService.sendBookingNotifications(bookingRequest.getStudent(), bookingRequest.getTutor());
             }
+
             response.put("message", message);
             return ResponseEntity.ok(response.toMap());
         } catch (StripeException e) {
@@ -190,9 +194,13 @@ public class StripeService {
         return ResponseEntity.ok().build();
     }
 
-    public void markPaymentSessionAsPaid(PaymentSession paymentSession){
+    public void markPaymentSessionAsPaid(PaymentSession paymentSession) {
         paymentSession.setCompleted(true);
         paymentSessionRepo.save(paymentSession);
+    }
+
+    private void sendNotification() {
+
     }
 
 }

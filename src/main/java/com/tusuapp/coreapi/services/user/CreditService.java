@@ -1,7 +1,9 @@
 package com.tusuapp.coreapi.services.user;
 
 import com.tusuapp.coreapi.models.CredPointMaster;
+import com.tusuapp.coreapi.models.Notification;
 import com.tusuapp.coreapi.repositories.CreditPointRepo;
+import com.tusuapp.coreapi.services.user.notifications.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,9 @@ public class CreditService {
     @Autowired
     private CreditPointRepo creditPointRepo;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public boolean currentUserHasEnoughCredit(Double amount) {
         try {
             System.out.println("currentUserHasEnoughCredit user " + getCurrentUserId());
@@ -25,7 +30,7 @@ public class CreditService {
                 creditPointRepo.save(getNewCreditPoint(getCurrentUserId(), 0.0));
                 return false;
             }
-            System.out.println("current user has balance " + creditPointOptional.get().getBalance());
+
             return creditPointOptional.get().getBalance() >= amount;
         } catch (Exception e) {
             e.printStackTrace();
@@ -64,6 +69,10 @@ public class CreditService {
             }
             creditPoint.setUpdatedAt(LocalDateTime.now());
             creditPointRepo.save(creditPoint);
+            System.out.println("current user has balance " + creditPointOptional.get().getBalance());
+            notificationService.addNotification(studentId,
+                    amount + " has been added to your account",
+                    "Payment has been success and points have been credited");
             return true;
         } catch (Exception e) {
             e.printStackTrace();

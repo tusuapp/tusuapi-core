@@ -10,6 +10,7 @@ import com.tusuapp.coreapi.models.dtos.bookings.ChangeBookingStatusDto;
 import com.tusuapp.coreapi.repositories.*;
 import com.tusuapp.coreapi.services.payments.stripe.StripeService;
 import com.tusuapp.coreapi.services.user.CreditService;
+import com.tusuapp.coreapi.services.user.notifications.NotificationService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,9 @@ public class BookingService {
     @Autowired
     private CreditService creditService;
 
+    @Autowired
+    private NotificationService notificationService;
+
 
     public ResponseEntity<?> getUserClasses(String typesParam, Integer limit) {
         List<String> types = List.of(typesParam.split(","));
@@ -90,6 +94,7 @@ public class BookingService {
         bookingRequest.setIsPaid(true);
         creditService.reduceCredits(bookingRequest.getStudent().getId(),bookingRequest.getTotalAmount());
         bookingRequest = bookingRepo.save(bookingRequest);
+        notificationService.sendBookingNotifications(bookingRequest.getStudent(),bookingRequest.getTutor());
         return ResponseEntity.ok(new BookingRequestDto(bookingRequest));
     }
 
