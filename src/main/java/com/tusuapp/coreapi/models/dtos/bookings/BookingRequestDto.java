@@ -8,6 +8,8 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.transformBookingReqFromUTC;
+
 @Data
 public class BookingRequestDto {
 
@@ -36,6 +38,7 @@ public class BookingRequestDto {
     }
 
     public BookingRequestDto(BookingRequest request) {
+        transformBookingReqFromUTC(request);
         this.id = request.getId();
         this.subjectId = request.getSubjectId();
         this.startTime = request.getStartTime();
@@ -57,6 +60,7 @@ public class BookingRequestDto {
     }
 
     public static BookingRequestDto fromBookingRequest(BookingRequest request, UserDto student, UserDto tutor) {
+        transformBookingReqFromUTC(request);
         BookingRequestDto dto = new BookingRequestDto();
         dto.setId(request.getId());
         dto.setStudent(student);
@@ -80,6 +84,7 @@ public class BookingRequestDto {
     }
 
     public static BookingRequestDto fromBookingRequest(BookingRequest request) {
+        transformBookingReqFromUTC(request);
         BookingRequestDto dto = new BookingRequestDto();
         dto.setId(request.getId());
         dto.setStudent(UserDto.fromUser(request.getStudent()));

@@ -44,7 +44,7 @@ public class BookingRequest {
     private Boolean isRescheduled = false;
 
     @Column(name = "parent_booking_id")
-    private Long parentBookingId; // If this is a reschedule, reference the original booking
+    private Long parentBookingId;
 
     @Column(name = "reschedule_reason", columnDefinition = "TEXT")
     private String rescheduleReason;

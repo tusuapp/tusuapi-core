@@ -7,6 +7,7 @@ import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.bookings.BookingRequestDto;
 import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
 import com.tusuapp.coreapi.models.dtos.bookings.ChangeBookingStatusDto;
+import com.tusuapp.coreapi.models.dtos.bookings.RescheduleBookingDto;
 import com.tusuapp.coreapi.repositories.*;
 import com.tusuapp.coreapi.services.payments.stripe.StripeService;
 import com.tusuapp.coreapi.services.user.CreditService;
@@ -28,6 +29,7 @@ import static com.tusuapp.coreapi.constants.BookingConstants.*;
 import static com.tusuapp.coreapi.utils.ResponseUtil.errorResponse;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 import static com.tusuapp.coreapi.utils.SessionUtil.isStudent;
+import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.getUtcDateTime;
 import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.transformBookingReqFromUTC;
 
 /**
@@ -59,6 +61,9 @@ public class BookingService {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private BookingRescheduleRepo rescheduleRepo;
 
 
     public ResponseEntity<?> getUserClasses(String typesParam, Integer limit) {
@@ -141,7 +146,6 @@ public class BookingService {
         if (studentDetails.isEmpty() || tutorDetails.isEmpty()) {
             return errorResponse(HttpStatus.BAD_REQUEST, "Student or tutor might be deactivated");
         }
-        transformBookingReqFromUTC(bookingRequest);
         BookingRequestDto response = BookingRequestDto.fromBookingRequest(
                 bookingRequest,
                 UserDto.fromUser(studentDetails.get()),
@@ -176,4 +180,6 @@ public class BookingService {
         request.setStatus(STATUS_REJECTED);
         request.setRejectionReason(changeStatusDto.getMessage());
     }
+
+
 }
