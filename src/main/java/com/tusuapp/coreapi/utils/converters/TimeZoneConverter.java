@@ -22,6 +22,13 @@ public class TimeZoneConverter {
         });
     }
 
+    public static void transformBookingRequestsFromUTC(List<BookingRequest> requests) {
+        requests.forEach(req -> {
+            req.setStartTime(getLocalDateTime(req.getStartTime()));
+            req.setEndTime(getLocalDateTime(req.getEndTime()));
+        });
+    }
+
     public static void transformTutorSlotFromUTC(TutorSlot slot) {
         slot.setFromDatetime(getLocalDateTime(slot.getFromDatetime()));
         slot.setToDatetime(getLocalDateTime(slot.getToDatetime()));

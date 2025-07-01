@@ -1,7 +1,6 @@
 package com.tusuapp.coreapi.services.user;
 
 import com.tusuapp.coreapi.models.CredPointMaster;
-import com.tusuapp.coreapi.models.Notification;
 import com.tusuapp.coreapi.repositories.CreditPointRepo;
 import com.tusuapp.coreapi.services.user.notifications.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,30 +52,30 @@ public class CreditService {
         }
     }
 
-    public boolean addCredits(Long studentId, Double amount) {
+    public void addCredits(Long studentId, Double amount) {
         try {
             Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByUserId(studentId);
             if (creditPointOptional.isEmpty()) {
                 creditPointRepo.save(getNewCreditPoint(studentId, amount));
-                return true;
+                return;
             }
             CredPointMaster creditPoint = creditPointOptional.get();
             creditPoint.setBalance(creditPoint.getBalance() + amount);
             try {
                 creditPoint.setUpdatedBy(getCurrentUserId());
+                notificationService.addNotification(studentId,
+                        amount + " has been added to your account",
+                        "Payment has been success and points have been credited");
             } catch (Exception e) {
                 creditPoint.setUpdatedBy(-3L);
+                notificationService.addNotification(studentId,
+                        amount + " has been refunded to your account",
+                        "Payment has been refunded and request have been cancelled");
             }
             creditPoint.setUpdatedAt(LocalDateTime.now());
             creditPointRepo.save(creditPoint);
-            System.out.println("current user has balance " + creditPointOptional.get().getBalance());
-            notificationService.addNotification(studentId,
-                    amount + " has been added to your account",
-                    "Payment has been success and points have been credited");
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
     }
 

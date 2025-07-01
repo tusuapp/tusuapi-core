@@ -38,7 +38,6 @@ public class BookingRequestDto {
     }
 
     public BookingRequestDto(BookingRequest request) {
-        transformBookingReqFromUTC(request);
         this.id = request.getId();
         this.subjectId = request.getSubjectId();
         this.startTime = request.getStartTime();

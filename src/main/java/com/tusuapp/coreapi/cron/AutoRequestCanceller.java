@@ -17,9 +17,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.getCurrentUTCTime;
 import static org.hibernate.internal.util.collections.CollectionHelper.listOf;
@@ -45,27 +44,34 @@ public class AutoRequestCanceller {
 
     @Scheduled(fixedDelay = 1000)
     public void autoCancelRequested() {
-        List<String> statues = listOf("requested", "rescheduled");
-        LocalDateTime utcTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"));
-        List<BookingRequest> requests = bookingRequestRepo.findAllByStartTimeBeforeAndStatusIn(utcTime, statues);
+        List<String> statues = listOf("requested");
+        List<BookingRequest> requests = bookingRequestRepo.findAllByStartTimeBeforeAndStatusIn(getCurrentUTCTime(), statues);
+        HashMap<Long, Double> refunds = new HashMap<>();
+        requests.forEach((r) -> {
+            refunds.put(r.getStudent().getId(), r.getHourlyCharge());
+            r.setStatus(BookingConstants.STATUS_AUTO_CANCELLED);
+        });
+        refunds.forEach((k, v) -> creditService.addCredits(k, v));
+        bookingRequestRepo.saveAll(requests);
     }
 
     @Scheduled(fixedDelay = 10 * 1000)
     public void autoCreateBookingSession() {
         LocalDateTime utcTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"));
-        List<BookingRequest> requests = bookingRequestRepo.findAllAcceptedBookingsWithinNext15Minutes(utcTime,utcTime.plusMinutes(15));
+        System.out.println(utcTime);
+        List<BookingRequest> requests = bookingRequestRepo.findAllAcceptedBookingsWithinNext15Minutes(utcTime, utcTime.plusMinutes(15));
         List<BookingSession> sessions = startSessions(requests);
-        System.out.println("Started " + sessions.size() + " sessions");
+        if (sessions.size() > 0)
+            System.out.println("Started " + sessions.size() + " sessions");
     }
 
     @Scheduled(fixedDelay = 13 * 1000)
     public void autoCompleteBookingSession() {
-        List<BookingRequest> requests = bookingRequestRepo.findAllByStatusAndEndTimeLessThanEqual(BookingConstants.STATUS_INPROGRESS,getCurrentUTCTime());
+        List<BookingRequest> requests = bookingRequestRepo.findAllByStatusAndEndTimeLessThanEqual(BookingConstants.STATUS_INPROGRESS, getCurrentUTCTime());
         stopSessions(requests);
-        System.out.println("Stopped " + requests.size() + " sessions");
+        if (requests.size() > 0)
+            System.out.println("Stopped " + requests.size() + " sessions");
     }
-
-
 
 
     public List<BookingSession> startSessions(List<BookingRequest> bookingRequests) {
@@ -87,9 +93,9 @@ public class AutoRequestCanceller {
     }
 
     public void stopSessions(List<BookingRequest> requests) {
-        requests.forEach((r)->{
+        requests.forEach((r) -> {
             r.setStatus(BookingConstants.STATUS_COMPLETED);
-            creditService.addCredits(r.getTutor().getId(),r.getHourlyCharge());
+            creditService.addCredits(r.getTutor().getId(), r.getHourlyCharge());
         });
         bookingRequestRepo.saveAll(requests);
     }

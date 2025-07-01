@@ -10,12 +10,12 @@ import com.tusuapp.coreapi.repositories.BookingRequestRepo;
 import com.tusuapp.coreapi.repositories.CountryRepo;
 import com.tusuapp.coreapi.repositories.TutorDetailRepo;
 import com.tusuapp.coreapi.repositories.UserInfoRepo;
-import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 
@@ -56,15 +56,19 @@ public class ProfileService {
         return ResponseEntity.ok(user);
     }
 
-    public ResponseEntity<?> getTutorProfile() {
-        User user = userRepo.findById(getCurrentUserId())
+    private ResponseEntity<?> getTutorProfile(Long tutorId) {
+        User user = userRepo.findById(tutorId)
                 .orElseThrow(()->new IllegalArgumentException("User not found"));
-        TutorDetails tutorDetails = tutorDetailRepo.findByUserId(getCurrentUserId())
+        TutorDetails tutorDetails = tutorDetailRepo.findByUserId(tutorId)
                 .orElseThrow(()->new IllegalArgumentException("No tutor details found, profile might not be completed"));
         JSONObject response = new JSONObject();
         response.put("tutor",UserDto.fromUser(user));
         response.put("tutorDetails",tutorDetails);
         return ResponseEntity.ok(response.toMap());
+    }
+
+    public ResponseEntity<?> getTutorProfile() {
+        return getTutorProfile(getCurrentUserId());
     }
 
     public ResponseEntity<?> updateTutorProfile(UpdateProfileDto updateDto) {
@@ -92,5 +96,9 @@ public class ProfileService {
         response.put("tutor",UserDto.fromUser(user));
         response.put("tutorDetails",tutorDetails);
         return ResponseEntity.ok(response.toMap());
+    }
+
+    public ResponseEntity<?> getTutorProfileWithId(Long id) {
+        return getTutorProfile(id);
     }
 }

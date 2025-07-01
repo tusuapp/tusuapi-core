@@ -29,8 +29,7 @@ import static com.tusuapp.coreapi.constants.BookingConstants.*;
 import static com.tusuapp.coreapi.utils.ResponseUtil.errorResponse;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 import static com.tusuapp.coreapi.utils.SessionUtil.isStudent;
-import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.getUtcDateTime;
-import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.transformBookingReqFromUTC;
+import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.*;
 
 /**
  * ClassesService created by Rithik S(coderithik@gmail.com)
@@ -78,9 +77,8 @@ public class BookingService {
             requests = bookingRepo
                     .findAllByTutorIdAndStatusIn(currentId, types);
         }
-
         List<BookingRequestDto> dtos = requests.stream()
-                .map(BookingRequestDto::new).toList();
+                .map(BookingRequestDto::fromBookingRequest).toList();
         if (limit != null && dtos.size() > 3) {
             dtos = dtos.subList(0, limit);
         }
@@ -114,16 +112,15 @@ public class BookingService {
         }
         //check if already time passed
         BookingRequest bookingRequest = new BookingRequest();
-        bookingRequest.setCreatedAt(LocalDateTime.now());
+        bookingRequest.setCreatedAt(getCurrentUTCTime());
         User student = userRepo.findById(getCurrentUserId()).orElseThrow(() -> new IllegalArgumentException("Student not found"));
         bookingRequest.setStudent(student);
         bookingRequest.setSlotId(initiateBookingReqDto.getSlot_id());
         bookingRequest.setSubjectId(initiateBookingReqDto.getSubject_id());
         User tutor = userRepo.findById(tutorSlot.get().getTutorId()).orElseThrow(() -> new IllegalArgumentException("Student not found"));
         bookingRequest.setTutor(tutor);
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        bookingRequest.setStartTime(LocalDateTime.parse(tutorSlot.get().getFromDatetime().toString(), formatter));
-        bookingRequest.setEndTime(LocalDateTime.parse(tutorSlot.get().getToDatetime().toString(), formatter));
+        bookingRequest.setStartTime(tutorSlot.get().getFromDatetime());
+        bookingRequest.setEndTime(tutorSlot.get().getToDatetime());
         Optional<TutorDetails> tutorDetails = tutorDetailRepo.findByUserId(bookingRequest.getTutor().getId());
         bookingRequest.setHourlyCharge(tutorDetails.get().getHourlyCharge());
         bookingRequest.setStatus(STATUS_CHECKOUT);
