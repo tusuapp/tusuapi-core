@@ -30,9 +30,9 @@ public class BookingsController {
     }
 
     @PostMapping("/pay")
-    public ResponseEntity<?> purchaseClass(@RequestParam Long bookingId){
+    public ResponseEntity<?> purchaseClass(@RequestParam Long bookingId, @RequestParam(required = false) String message){
         try {
-            return bookingService.purchaseClass(bookingId);
+            return bookingService.purchaseClass(bookingId, message);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.ok(e);

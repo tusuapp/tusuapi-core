@@ -10,5 +10,5 @@ phases:
         - echo Build completed!
 artifacts:
   files:
-    - target/coreapi-0.0.1-SNAPSHOT.jar
+    - target/tusucoreapi-0.0.1-SNAPSHOT.jar
   discard-paths: yes

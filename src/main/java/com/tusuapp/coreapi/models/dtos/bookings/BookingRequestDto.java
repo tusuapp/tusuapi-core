@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tusuapp.coreapi.models.BookingRequest;
 import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
+import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -31,31 +32,11 @@ public class BookingRequestDto {
     private LocalDateTime updatedAt;
     private Long slotId;
     private double hourlyFee;
+    private String rejectionReason;
+    private String studentMessage;
 
 
     public BookingRequestDto() {
-
-    }
-
-    public BookingRequestDto(BookingRequest request) {
-        this.id = request.getId();
-        this.subjectId = request.getSubjectId();
-        this.startTime = request.getStartTime();
-        this.endTime = request.getEndTime();
-        this.status = request.getStatus();
-        this.isRescheduled = request.getIsRescheduled();
-        this.parentBookingId = request.getParentBookingId();
-        this.rescheduleReason = request.getRescheduleReason();
-        this.rescheduledAt = request.getRescheduledAt();
-        this.isPaid = request.getIsPaid();
-        this.transactionId = request.getTransactionId();
-        this.createdAt = request.getCreatedAt();
-        this.updatedAt = request.getUpdatedAt();
-        this.slotId = request.getSlotId();
-        this.student = UserDto.fromUser(request.getStudent());
-        this.tutor = UserDto.fromUser(request.getTutor());
-        this.hourlyFee = request.getHourlyCharge();
-        this.totalAmount = request.getTotalAmount();
     }
 
     public static BookingRequestDto fromBookingRequest(BookingRequest request, UserDto student, UserDto tutor) {
@@ -79,6 +60,8 @@ public class BookingRequestDto {
         dto.setSlotId(request.getSlotId());
         dto.setHourlyFee(request.getHourlyCharge());
         dto.setTotalAmount(request.getTotalAmount());
+        dto.setStudentMessage(request.getStudentMessage());
+        dto.setRejectionReason(request.getRejectionReason());
         return dto;
     }
 
@@ -103,6 +86,8 @@ public class BookingRequestDto {
         dto.setSlotId(request.getSlotId());
         dto.setHourlyFee(request.getHourlyCharge());
         dto.setTotalAmount(request.getTotalAmount());
+        dto.setStudentMessage(request.getStudentMessage());
+        dto.setRejectionReason(request.getRejectionReason());
         return dto;
     }
 

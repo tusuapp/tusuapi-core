@@ -44,7 +44,6 @@ public class ClassService {
         String meetingId = "tusu_booking_" + session.getId();
         session.setMeetingId(meetingId);
         String createdUrl = bbbService.generateCreateUrl(session);
-        System.out.println(createdUrl);
         String response = restClient(RestClient.builder(), createdUrl).get().retrieve().body(String.class);
         if (response.contains("FAILED")) {
             return ResponseEntity.badRequest().body(response);

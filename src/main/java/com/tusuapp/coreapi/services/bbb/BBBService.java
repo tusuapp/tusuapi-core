@@ -10,7 +10,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Formatter;
-import java.util.UUID;
 
 
 @Service
@@ -30,7 +29,9 @@ public class BBBService {
                 "&meetingID=" + session.getMeetingId() +
                 "&attendeePW=" + session.getStudentPass() +
                 "&moderatorPW=" + session.getTutorPass() +
-                "&autoStartRecording=true";
+                "&autoStartRecording=true" +
+                "&endCallbackUrl=https://tusuapp.com" +
+                "&logoutURL=https://tusuapp.com";
         String checksumSource = "create" + query + BBB_SECRET;
         String checksum = sha1Hex(checksumSource);
         return BBB_BASE_URL + "/create?" + query + "&checksum=" + checksum;
@@ -40,7 +41,9 @@ public class BBBService {
         String encodedFullName = URLEncoder.encode(userName, StandardCharsets.UTF_8);
         String queryString = "fullName=" + encodedFullName + "&meetingID=" + meetingID
                 + "&password=" + password
-                + "&autoStartRecording=true";
+                + "&autoStartRecording=true"
+                + "&endCallbackUrl=https://tusuapp.com"
+                + "&logoutURL=https://tusuapp.com";
         String toHash = "join" + queryString + BBB_SECRET;
         String checksum = sha1Hex(toHash);
         return BBB_BASE_URL + "/join?" + queryString + "&checksum=" + checksum;

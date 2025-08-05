@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.tusuapp</groupId>
-	<artifactId>coreapi</artifactId>
+	<artifactId>tusucoreapi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>coreapi</name>
+	<name>tusu-coreapi</name>
 	<description>v2 API for TusuApp</description>
 	<url/>
 	<licenses>

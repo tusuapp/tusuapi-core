@@ -7,7 +7,6 @@ import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.bookings.BookingRequestDto;
 import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
 import com.tusuapp.coreapi.models.dtos.bookings.ChangeBookingStatusDto;
-import com.tusuapp.coreapi.models.dtos.bookings.RescheduleBookingDto;
 import com.tusuapp.coreapi.repositories.*;
 import com.tusuapp.coreapi.services.payments.stripe.StripeService;
 import com.tusuapp.coreapi.services.user.CreditService;
@@ -18,8 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,19 +83,20 @@ public class BookingService {
     }
 
     @Transactional
-    public ResponseEntity<?> purchaseClass(Long bookingRequestId) throws StripeException {
+    public ResponseEntity<?> purchaseClass(Long bookingRequestId, String message) throws StripeException {
         BookingRequest bookingRequest = bookingRepo.findById(bookingRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("No Booking Found"));
         if (!creditService.currentUserHasEnoughCredit(bookingRequest.getTotalAmount())) {
             double remainingCreditsRequired = bookingRequest.getTotalAmount() - creditService.getCurrentUserBalance();
             return stripeService.purchaseRemainingCredits(bookingRequest.getId(), remainingCreditsRequired);
         }
+        bookingRequest.setStudentMessage(message);
         bookingRequest.setStatus(BookingConstants.STATUS_REQUESTED);
         bookingRequest.setIsPaid(true);
         creditService.reduceCredits(bookingRequest.getStudent().getId(),bookingRequest.getTotalAmount());
         bookingRequest = bookingRepo.save(bookingRequest);
         notificationService.sendBookingNotifications(bookingRequest.getStudent(),bookingRequest.getTutor());
-        return ResponseEntity.ok(new BookingRequestDto(bookingRequest));
+        return ResponseEntity.ok(BookingRequestDto.fromBookingRequest(bookingRequest));
     }
 
     public ResponseEntity<?> initiateBooking(InitiateBookingReqDto initiateBookingReqDto) throws Exception {
