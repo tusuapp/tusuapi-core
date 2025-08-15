@@ -53,7 +53,7 @@ public class ProfileService {
         user.setPhone(updateDto.getPhone());
         user.setAddress(updateDto.getAddress());
         user = userRepo.save(user);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(UserDto.fromUser(user));
     }
 
     private ResponseEntity<?> getTutorProfile(Long tutorId) {
