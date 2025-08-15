@@ -2,21 +2,28 @@ package com.tusuapp.coreapi.services.user.bookings;
 
 import com.stripe.exception.StripeException;
 import com.tusuapp.coreapi.constants.BookingConstants;
-import com.tusuapp.coreapi.models.*;
+import com.tusuapp.coreapi.models.BookingRequest;
+import com.tusuapp.coreapi.models.TutorDetails;
+import com.tusuapp.coreapi.models.TutorSlot;
+import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.bookings.BookingRequestDto;
-import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
 import com.tusuapp.coreapi.models.dtos.bookings.ChangeBookingStatusDto;
+import com.tusuapp.coreapi.models.dtos.bookings.InitiateBookingReqDto;
 import com.tusuapp.coreapi.repositories.*;
 import com.tusuapp.coreapi.services.payments.stripe.StripeService;
 import com.tusuapp.coreapi.services.user.CreditService;
 import com.tusuapp.coreapi.services.user.notifications.NotificationService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,41 +33,36 @@ import static com.tusuapp.coreapi.constants.BookingConstants.*;
 import static com.tusuapp.coreapi.utils.ResponseUtil.errorResponse;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 import static com.tusuapp.coreapi.utils.SessionUtil.isStudent;
-import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.*;
+import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.getCurrentUTCTime;
+import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.transformBookingRequestsFromUTC;
 
 /**
  * ClassesService created by Rithik S(coderithik@gmail.com)
  **/
 @Service
+@RequiredArgsConstructor
 public class BookingService {
 
-    @Autowired
-    private TutorSlotRepo tutorSlotRepo;
+    private final TutorSlotRepo tutorSlotRepo;
 
-    @Autowired
-    private BookingRequestRepo bookingRepo;
+    private final BookingRequestRepo bookingRepo;
 
-    @Autowired
-    private UserInfoRepo userRepo;
+    private final UserInfoRepo userRepo;
 
-    @Autowired
-    private TutorDetailRepo tutorDetailRepo;
+    private final TutorDetailRepo tutorDetailRepo;
 
-    @Autowired
-    CreditPointRepo creditPointRepo;
+    private final CreditPointRepo creditPointRepo;
 
-    @Autowired
-    private StripeService stripeService;
+    private final StripeService stripeService;
 
-    @Autowired
-    private CreditService creditService;
+    private final CreditService creditService;
 
-    @Autowired
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
-    @Autowired
-    private BookingRescheduleRepo rescheduleRepo;
+    private final BookingRescheduleRepo rescheduleRepo;
 
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public ResponseEntity<?> getUserClasses(String typesParam, Integer limit) {
         List<String> types = List.of(typesParam.split(","));
@@ -74,7 +76,7 @@ public class BookingService {
             requests = bookingRepo
                     .findAllByTutorIdAndStatusIn(currentId, types);
         }
-        List<BookingRequestDto> dtos = requests.stream()
+        List<BookingRequestDto>  dtos = requests.stream()
                 .map(BookingRequestDto::fromBookingRequest).toList();
         if (limit != null && dtos.size() > 3) {
             dtos = dtos.subList(0, limit);
@@ -82,7 +84,7 @@ public class BookingService {
         return ResponseEntity.ok(Map.of("bookings", dtos));
     }
 
-    @Transactional
+
     public ResponseEntity<?> purchaseClass(Long bookingRequestId, String message) throws StripeException {
         BookingRequest bookingRequest = bookingRepo.findById(bookingRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("No Booking Found"));
@@ -90,16 +92,17 @@ public class BookingService {
             double remainingCreditsRequired = bookingRequest.getTotalAmount() - creditService.getCurrentUserBalance();
             return stripeService.purchaseRemainingCredits(bookingRequest.getId(), remainingCreditsRequired);
         }
+
         bookingRequest.setStudentMessage(message);
         bookingRequest.setStatus(BookingConstants.STATUS_REQUESTED);
         bookingRequest.setIsPaid(true);
-        creditService.reduceCredits(bookingRequest.getStudent().getId(),bookingRequest.getTotalAmount());
         bookingRequest = bookingRepo.save(bookingRequest);
-        notificationService.sendBookingNotifications(bookingRequest.getStudent(),bookingRequest.getTutor());
+        creditService.reduceCredits(bookingRequest.getStudent().getId(), bookingRequest.getTotalAmount());
+        notificationService.sendBookingNotifications(bookingRequest.getStudent(), bookingRequest.getTutor());
         return ResponseEntity.ok(BookingRequestDto.fromBookingRequest(bookingRequest));
     }
 
-    public ResponseEntity<?> initiateBooking(InitiateBookingReqDto initiateBookingReqDto) throws Exception {
+    public ResponseEntity<?> initiateBooking(InitiateBookingReqDto initiateBookingReqDto) {
         Optional<TutorSlot> tutorSlot = tutorSlotRepo.findById(initiateBookingReqDto.getSlot_id());
         if (tutorSlot.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No slot found");
@@ -150,13 +153,13 @@ public class BookingService {
 
     public ResponseEntity<?> changeBookingStatus(ChangeBookingStatusDto changeStatusDto) {
         BookingRequest request = bookingRepo.findById(changeStatusDto.getBookingId())
-                .orElseThrow(()->new IllegalArgumentException("No booking found"));
-        if(!request.getTutor().getId().equals(getCurrentUserId())){
+                .orElseThrow(() -> new IllegalArgumentException("No booking found"));
+        if (!request.getTutor().getId().equals(getCurrentUserId())) {
             return ResponseEntity.notFound().build();
         }
-        switch (changeStatusDto.getStatus()){
+        switch (changeStatusDto.getStatus()) {
             case STATUS_REJECTED -> rejectBooking(request, changeStatusDto);
-            case STATUS_ACCEPTED -> acceptBooking(request,changeStatusDto);
+            case STATUS_ACCEPTED -> acceptBooking(request, changeStatusDto);
             default -> throw new IllegalArgumentException("Invalid status");
         }
         request = bookingRepo.save(request);
@@ -176,5 +179,9 @@ public class BookingService {
         request.setRejectionReason(changeStatusDto.getMessage());
     }
 
+    public BookingRequest getBookingReadOnly(Long id) {
+        return bookingRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No Booking Found"));
+    }
 
 }

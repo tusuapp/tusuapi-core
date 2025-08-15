@@ -33,8 +33,6 @@ public class RescheduleController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public ResponseEntity<?> updateRescheduleRequest(@PathVariable("id") Long id, @RequestParam String status) {
-        System.out.println(id);
-        System.out.println(status);
         return rescheduleService.updateRescheduleRequest(id,status);
     }
 

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,13 +38,13 @@ public class DashboardService {
         List<BookingRequest> upcomingAccepted = bookingsRepo
                 .findByTutorIdAndStatusInAndStartTimeAfterOrderByStartTimeAsc(
                         tutorId,
-                        listOf(BookingConstants.STATUS_ACCEPTED,BookingConstants.STATUS_INPROGRESS),
+                        listOf(BookingConstants.STATUS_ACCEPTED, BookingConstants.STATUS_INPROGRESS),
                         getCurrentUTCTime()
                 );
         List<BookingRequestDto> upcomingDto = upcomingAccepted.stream().map(BookingRequestDto::fromBookingRequest).toList();
         response.put("upcomingClasses", upcomingDto);
         Optional<CredPointMaster> credits = creditPointRepo.findByUserId(getCurrentUserId());
-        response.put("totalEarning",40);
+        response.put("totalEarning", 0);
         credits.ifPresent(credPointMaster -> response.put("totalEarning", credPointMaster.getBalance()));
         return ResponseEntity.ok(response.toMap());
 

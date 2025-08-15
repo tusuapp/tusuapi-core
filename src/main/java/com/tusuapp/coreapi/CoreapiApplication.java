@@ -1,5 +1,6 @@
 package com.tusuapp.coreapi;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -15,13 +16,18 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Formatter;
+import java.util.TimeZone;
 import java.util.UUID;
 
 @SpringBootApplication
 @EnableScheduling
 public class CoreapiApplication {
 
-
+	@PostConstruct
+	public void init() {
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+		System.out.println("Default JVM timezone set to UTC");
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(CoreapiApplication.class, args);

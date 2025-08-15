@@ -42,7 +42,7 @@ public class AutoRequestCanceller {
     private BookingSessionRepo bookingSessionRepo;
 
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 30 *  1000)
     public void autoCancelRequested() {
         List<String> statues = listOf("requested");
         List<BookingRequest> requests = bookingRequestRepo.findAllByStartTimeBeforeAndStatusIn(getCurrentUTCTime(), statues);
@@ -55,17 +55,17 @@ public class AutoRequestCanceller {
         bookingRequestRepo.saveAll(requests);
     }
 
-    @Scheduled(fixedDelay = 10 * 1000)
+    @Scheduled(fixedDelay = 30 * 1000)
     public void autoCreateBookingSession() {
         LocalDateTime utcTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"));
-        System.out.println(utcTime);
         List<BookingRequest> requests = bookingRequestRepo.findAllAcceptedBookingsWithinNext15Minutes(utcTime, utcTime.plusMinutes(15));
         List<BookingSession> sessions = startSessions(requests);
-        if (sessions.size() > 0)
+        if (sessions.size() > 0) {
             System.out.println("Started " + sessions.size() + " sessions");
+        }
     }
 
-    @Scheduled(fixedDelay = 13 * 1000)
+    @Scheduled(fixedDelay = 30 * 1000)
     public void autoCompleteBookingSession() {
         List<BookingRequest> requests = bookingRequestRepo.findAllByStatusAndEndTimeLessThanEqual(BookingConstants.STATUS_INPROGRESS, getCurrentUTCTime());
         stopSessions(requests);

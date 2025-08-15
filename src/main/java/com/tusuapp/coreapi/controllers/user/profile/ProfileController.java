@@ -33,7 +33,6 @@ public class ProfileController {
 
     @GetMapping("/tutor/{id}")
     public ResponseEntity<?> getTutorProfileWithId(@PathVariable("id") Long id){
-        System.out.println(id);
         return profileService.getTutorProfileWithId(id);
     }
 
