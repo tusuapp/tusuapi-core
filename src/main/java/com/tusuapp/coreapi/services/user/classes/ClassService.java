@@ -38,6 +38,14 @@ public class ClassService {
         String meetingId = "tusu_booking_" + session.getId();
         session.setMeetingId(meetingId);
         if (bbbService.isMeetingRunning(meetingId)) {
+            if (session.getStudentBBBUrl() == null) {
+                String studentUrl = generateBBBUrl(session.getBooking().getStudent(), meetingId, session.getStudentPass());
+                session.setStudentBBBUrl(studentUrl);
+            }
+            if (session.getTutorBBBUrl() == null) {
+                String tutorUrl = generateBBBUrl(session.getBooking().getTutor(), meetingId, session.getTutorPass());
+                session.setTutorBBBUrl(tutorUrl);
+            }
             if (isStudent()) {
                 session.setStudentJoined(true);
             } else {
