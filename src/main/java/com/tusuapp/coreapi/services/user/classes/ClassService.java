@@ -1,7 +1,6 @@
 package com.tusuapp.coreapi.services.user.classes;
 
 
-import com.tusuapp.coreapi.models.BookingRequest;
 import com.tusuapp.coreapi.models.BookingSession;
 import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.repositories.BookingSessionRepo;
@@ -11,10 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import static com.tusuapp.coreapi.utils.OTPUtil.generateOTP;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
@@ -37,10 +33,8 @@ public class ClassService {
                 !(Objects.equals(session.getBooking().getStudent().getId(), getCurrentUserId()))) {
             return ResponseEntity.notFound().build();
         }
-        if(session.getTutorPass() == null && session.getStudentPass() == null) {
-            session.setStudentPass(generateOTP(4));
-            session.setTutorPass(generateOTP(4));
-        }
+        session.setStudentPass(generateOTP(4));
+        session.setTutorPass(generateOTP(4));
         String meetingId = "tusu_booking_" + session.getId();
         session.setMeetingId(meetingId);
         String createdUrl = bbbService.generateCreateUrl(session);
@@ -52,9 +46,9 @@ public class ClassService {
         String tutorUrl = generateBBBUrl(session.getBooking().getTutor(), meetingId, session.getTutorPass());
         session.setStudentBBBUrl(studentUrl);
         session.setTutorBBBUrl(tutorUrl);
-        if(isStudent()){
+        if (isStudent()) {
             session.setStudentJoined(true);
-        }else{
+        } else {
             System.out.println("Tutor true");
             session.setTutorJoined(true);
         }
@@ -62,7 +56,6 @@ public class ClassService {
         removeUnauthorizedDetails(session);
         return ResponseEntity.ok(session);
     }
-
 
 
     private void removeUnauthorizedDetails(BookingSession session) {
