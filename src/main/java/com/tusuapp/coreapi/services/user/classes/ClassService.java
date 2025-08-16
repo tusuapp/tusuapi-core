@@ -38,6 +38,12 @@ public class ClassService {
         String meetingId = "tusu_booking_" + session.getId();
         session.setMeetingId(meetingId);
         if (bbbService.isMeetingRunning(meetingId)) {
+            if (isStudent()) {
+                session.setStudentJoined(true);
+            } else {
+                session.setTutorJoined(true);
+            }
+            session = bookingSessionRepo.save(session);
             return ResponseEntity.ok(session);
         }
         session.setStudentPass(generateOTP(4));
