@@ -5,6 +5,7 @@ import com.tusuapp.coreapi.repositories.BookingSessionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -30,20 +31,31 @@ public class BBBService {
                 "&attendeePW=" + session.getStudentPass() +
                 "&moderatorPW=" + session.getTutorPass() +
                 "&autoStartRecording=true" +
-                "&endCallbackUrl=https://tusuapp.com" +
                 "&logoutURL=https://tusuapp.com";
         String checksumSource = "create" + query + BBB_SECRET;
         String checksum = sha1Hex(checksumSource);
         return BBB_BASE_URL + "/create?" + query + "&checksum=" + checksum;
     }
 
+    public boolean isMeetingRunning(String meetingId) throws Exception {
+        String query = "meetingID=" + meetingId;
+        String checksumSource = "isMeetingRunning" + query + BBB_SECRET;
+        String checksum = sha1Hex(checksumSource);
+        String url = BBB_BASE_URL + "/isMeetingRunning?" + query + "&checksum=" + checksum;
+        RestTemplate restTemplate = new RestTemplate();
+        String response = restTemplate.getForObject(url, String.class);
+        return response.contains("<running>true</running>");
+    }
+
+
     public String generateJoinUrl(String userName, String meetingID, String password) throws Exception {
         String encodedFullName = URLEncoder.encode(userName, StandardCharsets.UTF_8);
-        String queryString = "fullName=" + encodedFullName + "&meetingID=" + meetingID
+        String queryString = "meetingID=" + meetingID
+                + "&fullName=" + encodedFullName
                 + "&password=" + password
-                + "&autoStartRecording=true"
-                + "&endCallbackUrl=https://tusuapp.com"
-                + "&logoutURL=https://tusuapp.com";
+                + "&redirect=true"
+                + "&logoutURL=" + URLEncoder.encode("https://tusuapp.com", StandardCharsets.UTF_8);
+
         String toHash = "join" + queryString + BBB_SECRET;
         String checksum = sha1Hex(toHash);
         return BBB_BASE_URL + "/join?" + queryString + "&checksum=" + checksum;

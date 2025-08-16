@@ -6,6 +6,7 @@ import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.repositories.BookingSessionRepo;
 import com.tusuapp.coreapi.services.bbb.BBBService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestClient;
 import java.util.Objects;
 
 import static com.tusuapp.coreapi.utils.OTPUtil.generateOTP;
+import static com.tusuapp.coreapi.utils.ResponseUtil.errorResponse;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 import static com.tusuapp.coreapi.utils.SessionUtil.isStudent;
 
@@ -33,23 +35,26 @@ public class ClassService {
                 !(Objects.equals(session.getBooking().getStudent().getId(), getCurrentUserId()))) {
             return ResponseEntity.notFound().build();
         }
-        session.setStudentPass(generateOTP(4));
-        session.setTutorPass(generateOTP(4));
         String meetingId = "tusu_booking_" + session.getId();
         session.setMeetingId(meetingId);
-        String createdUrl = bbbService.generateCreateUrl(session);
-        String response = restClient(RestClient.builder(), createdUrl).get().retrieve().body(String.class);
-        if (response.contains("FAILED")) {
-            return ResponseEntity.badRequest().body(response);
+        if (bbbService.isMeetingRunning(meetingId)) {
+            return ResponseEntity.ok(session);
         }
+        session.setStudentPass(generateOTP(4));
+        session.setTutorPass(generateOTP(4));
+        String createdUrl = bbbService.generateCreateUrl(session);
+        System.out.println(createdUrl);
+        String response = restClient(RestClient.builder(), createdUrl).get().retrieve().body(String.class);
         String studentUrl = generateBBBUrl(session.getBooking().getStudent(), meetingId, session.getStudentPass());
         String tutorUrl = generateBBBUrl(session.getBooking().getTutor(), meetingId, session.getTutorPass());
+        if (response.contains("FAILED")) {
+            return errorResponse(HttpStatus.BAD_GATEWAY, "Unable to create session");
+        }
         session.setStudentBBBUrl(studentUrl);
         session.setTutorBBBUrl(tutorUrl);
         if (isStudent()) {
             session.setStudentJoined(true);
         } else {
-            System.out.println("Tutor true");
             session.setTutorJoined(true);
         }
         session = bookingSessionRepo.save(session);

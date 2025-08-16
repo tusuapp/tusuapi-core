@@ -93,7 +93,6 @@ public class CreditService {
             }
             creditPoint.setUpdatedBy(getCurrentUserId());
             creditPoint.setBalance(creditPoint.getBalance() - amount);
-            System.out.println("Reduced credits = " + creditPoint.getBalance());
             creditPoint.setUpdatedAt(LocalDateTime.now());
             creditPointRepo.save(creditPoint);
             return true;

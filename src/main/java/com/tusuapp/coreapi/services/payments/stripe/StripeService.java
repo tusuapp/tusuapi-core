@@ -60,7 +60,6 @@ public class StripeService {
                 .orElseThrow(() -> new IllegalArgumentException("BookingRequest not found"));
 
         BigDecimal totalAmount = BigDecimal.valueOf(amount);
-        System.out.println(totalAmount);
         Map<String, String> metadata = new HashMap<>();
         metadata.put("booking_id", bookingRequest.getId().toString());
         metadata.put("type", "remaining_purchase");

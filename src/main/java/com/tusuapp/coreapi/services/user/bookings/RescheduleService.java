@@ -70,7 +70,6 @@ public class RescheduleService {
         reschedule.setStudent(request.getStudent());
         reschedule.setTutor(request.getTutor());
         reschedule.setStatus(REQUESTED);
-        System.out.println(rescheduleDto.getDate());
         LocalDateTime localDateTime = LocalDateTime.parse(rescheduleDto.getStartTime());
         localDateTime = getUtcDateTime(localDateTime);
         reschedule.setProposedDateTime(localDateTime);

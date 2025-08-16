@@ -31,7 +31,6 @@ public class SessionUtil {
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst();
-        System.out.println(item.get());
         return item.get().equals("ROLE_STUDENT");
     }
 

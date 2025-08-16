@@ -72,7 +72,6 @@ public class ProfileService {
     }
 
     public ResponseEntity<?> updateTutorProfile(UpdateProfileDto updateDto) {
-        System.out.println(updateDto.getCountryId());
         User user = userRepo.findById(getCurrentUserId())
                 .orElseThrow(()->new IllegalArgumentException("User not found"));
         TutorDetails tutorDetails = tutorDetailRepo.findByUserId(getCurrentUserId())
