@@ -61,6 +61,7 @@ public class ClassService {
         String response = restClient(RestClient.builder(), createdUrl).get().retrieve().body(String.class);
         String studentUrl = generateBBBUrl(session.getBooking().getStudent(), meetingId, session.getStudentPass());
         String tutorUrl = generateBBBUrl(session.getBooking().getTutor(), meetingId, session.getTutorPass());
+        System.out.println(response);
         if (response.contains("FAILED")) {
             return errorResponse(HttpStatus.BAD_GATEWAY, "Unable to create session");
         }
@@ -72,7 +73,7 @@ public class ClassService {
             session.setTutorJoined(true);
         }
         session = bookingSessionRepo.save(session);
-        removeUnauthorizedDetails(session);
+//        removeUnauthorizedDetails(session);
         return ResponseEntity.ok(session);
     }
 
