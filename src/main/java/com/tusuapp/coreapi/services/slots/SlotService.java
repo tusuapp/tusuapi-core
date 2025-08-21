@@ -28,7 +28,7 @@ public class SlotService {
     public ResponseEntity<?> createSlot(CreateSlotDto createSlotDto) {
         TutorSlot slot = new TutorSlot();
         slot.setFromDatetime(getUtcDateTime(createSlotDto.getFromDateTime()));
-        slot.setToDatetime(getUtcDateTime(createSlotDto.getToDateTime()));
+        slot.setToDatetime(getUtcDateTime(createSlotDto.getFromDateTime().plusHours(1)));
 
         List<TutorSlot> overLappingSlots = tutorSlotRepo.findOverlappingSlots(getCurrentUserId(),
                 slot.getFromDatetime(),
