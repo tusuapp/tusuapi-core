@@ -54,8 +54,6 @@ public class ClassService {
             session = bookingSessionRepo.save(session);
             return ResponseEntity.ok(session);
         }
-        session.setStudentPass(generateOTP(4));
-        session.setTutorPass(generateOTP(4));
         String createdUrl = bbbService.generateCreateUrl(session);
         System.out.println(createdUrl);
         String response = restClient(RestClient.builder(), createdUrl).get().retrieve().body(String.class);

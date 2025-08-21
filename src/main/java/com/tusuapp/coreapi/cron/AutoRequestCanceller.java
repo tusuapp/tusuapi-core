@@ -9,6 +9,7 @@ import com.tusuapp.coreapi.repositories.BookingSessionRepo;
 import com.tusuapp.coreapi.services.user.CreditService;
 import com.tusuapp.coreapi.services.user.bookings.BookingService;
 import com.tusuapp.coreapi.services.user.classes.ClassService;
+import com.tusuapp.coreapi.utils.OTPUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -80,6 +81,8 @@ public class AutoRequestCanceller {
             boolean exists = bookingSessionRepo.existsByBooking(request);
             if (!exists) {
                 BookingSession session = new BookingSession();
+                session.setTutorPass(OTPUtil.generateOTP(4));
+                session.setStudentPass(OTPUtil.generateOTP(4));
                 session.setBooking(request);
                 newSessions.add(session);
                 request.setStatus(BookingConstants.STATUS_INPROGRESS);
