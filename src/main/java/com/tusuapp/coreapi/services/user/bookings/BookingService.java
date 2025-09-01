@@ -19,6 +19,9 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -69,12 +72,13 @@ public class BookingService {
         Long currentId = getCurrentUserId();
 
         List<BookingRequest> requests;
+        Pageable pageable = PageRequest.of(0, 100, Sort.by("createdAt").descending());
         if (isStudent()) {
             requests = bookingRepo
-                    .findAllByStudentIdAndStatusIn(currentId, types);
+                    .findAllByStudentIdAndStatusIn(currentId, types, pageable);
         } else {
             requests = bookingRepo
-                    .findAllByTutorIdAndStatusIn(currentId, types);
+                    .findAllByTutorIdAndStatusIn(currentId, types, pageable);
         }
         List<BookingRequestDto>  dtos = requests.stream()
                 .map(BookingRequestDto::fromBookingRequest).toList();

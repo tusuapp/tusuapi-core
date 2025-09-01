@@ -2,6 +2,7 @@ package com.tusuapp.coreapi.utils.converters;
 
 
 import com.tusuapp.coreapi.models.BookingRequest;
+import com.tusuapp.coreapi.models.RescheduleRequest;
 import com.tusuapp.coreapi.models.TutorSlot;
 
 import java.time.Instant;
@@ -34,6 +35,12 @@ public class TimeZoneConverter {
         slot.setToDatetime(getLocalDateTime(slot.getToDatetime()));
     }
 
+    public static void transformRescheduleFromUTC(RescheduleRequest request) {
+        request.setProposedDateTime(getLocalDateTime(request.getProposedDateTime()));
+        request.setCreatedAt(getLocalDateTime(request.getCreatedAt()));
+        request.setUpdatedAt(getLocalDateTime(request.getUpdatedAt()));
+    }
+
     public static void transformBookingReqFromUTC(BookingRequest slot) {
         slot.setStartTime(getLocalDateTime(slot.getStartTime()));
         slot.setEndTime(getLocalDateTime(slot.getEndTime()));
@@ -47,9 +54,12 @@ public class TimeZoneConverter {
     }
 
     public static LocalDateTime getUtcDateTime(LocalDateTime tzDateTime) {
+        System.out.println(getCurrentUserTimeZone());
         ZoneId targetZone = ZoneId.of(getCurrentUserTimeZone());
         ZonedDateTime zonedDateTime = tzDateTime.atZone(targetZone);
+        System.out.println("zonedDateTime " + zonedDateTime);
         ZonedDateTime utcZoned = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
+        System.out.println("Converted "  + utcZoned);
         return utcZoned.toLocalDateTime();
     }
 

@@ -8,6 +8,9 @@ import com.tusuapp.coreapi.repositories.BookingRequestRepo;
 import com.tusuapp.coreapi.repositories.CreditPointRepo;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +34,8 @@ public class DashboardService {
     public ResponseEntity<?> getTutorDashboard() {
         Long tutorId = getCurrentUserId();
         JSONObject response = new JSONObject();
-        List<BookingRequest> requestList = bookingsRepo.findAllByTutorIdAndStatusIn(tutorId, listOf("requested"));
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+        List<BookingRequest> requestList = bookingsRepo.findAllByTutorIdAndStatusIn(tutorId, listOf("requested"), pageable);
         System.out.println(requestList.size());
         List<BookingRequestDto> requestsDto = requestList.stream().map(BookingRequestDto::fromBookingRequest).toList();
         response.put("bookingRequests", requestsDto);

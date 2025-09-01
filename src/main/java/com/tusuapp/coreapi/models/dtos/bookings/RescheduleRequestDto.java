@@ -13,6 +13,7 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 
 import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.getUtcDateTime;
+import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.transformRescheduleFromUTC;
 
 @Data
 @ToString
@@ -29,12 +30,13 @@ public class RescheduleRequestDto {
     private LocalDateTime updatedAt;
 
     public static RescheduleRequestDto fromRescheduleRequest(RescheduleRequest request){
+        transformRescheduleFromUTC(request);
         RescheduleRequestDto dto = new RescheduleRequestDto();
         dto.setAccepted(request.isAccepted());
         dto.setId(request.getId());
         dto.setBooking(BookingRequestDto.fromBookingRequest(request.getBooking()));
         dto.setMessage(request.getMessage());
-        dto.setProposedDateTime(getUtcDateTime(request.getProposedDateTime()));
+        dto.setProposedDateTime(request.getProposedDateTime());
         dto.setCreatedAt(request.getCreatedAt());
         dto.setUpdatedAt(request.getUpdatedAt());
         return dto;

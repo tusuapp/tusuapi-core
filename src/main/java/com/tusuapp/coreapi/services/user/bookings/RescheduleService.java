@@ -72,6 +72,11 @@ public class RescheduleService {
         reschedule.setStatus(REQUESTED);
         LocalDateTime localDateTime = LocalDateTime.parse(rescheduleDto.getStartTime());
         localDateTime = getUtcDateTime(localDateTime);
+        if(localDateTime.isBefore(getCurrentUTCTime())){
+            return errorResponse(HttpStatus.BAD_REQUEST,"Cannot reschedule to past time");
+        }
+        System.out.println("utc time reschedule");
+        System.out.println(localDateTime);
         reschedule.setProposedDateTime(localDateTime);
         reschedule.setMessage(reschedule.getMessage());
         reschedule = rescheduleRepo.save(reschedule);
