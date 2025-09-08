@@ -52,7 +52,7 @@ public class NotificationService {
                 "Class from " + tutor.getFullName() + " has been rejected",
                 "Credits have been refunded to your account", false);
         addNotification(tutor.getId(),
-                "Booking request from " + student.getFullName() + " has been rejected",
+                "Booking from " + student.getFullName() + " has been rejected",
                 "You can accept or decline the booking", true);
     }
 
