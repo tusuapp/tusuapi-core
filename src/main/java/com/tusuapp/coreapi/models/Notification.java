@@ -37,6 +37,9 @@ public class Notification {
     @Column(name = "read_status")
     private Boolean readStatus;
 
+    @Column(name = "shown_status")
+    private Boolean shownStatus = false;
+
     @Column(name = "user_created_at")
     private String userCreatedAt;
 

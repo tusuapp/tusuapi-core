@@ -21,8 +21,10 @@ public class JwtService {
 
     public static final String SECRET = "8c33cb59eaa3abe9779bd87f3a6544f9a1ebdb73dff544bcb4de447b2792ecec7039545fda6defec72fb694c0ef12392680a";
 
-    public String generateToken(String email) {
+    public String generateToken(String id, String email) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("id", id);
+        claims.put("email", email);
         return createToken(claims, email);
     }
 
@@ -31,7 +33,7 @@ public class JwtService {
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 360))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

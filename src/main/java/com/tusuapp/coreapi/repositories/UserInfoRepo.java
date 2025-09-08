@@ -9,4 +9,8 @@ import java.util.Optional;
 @Repository
 public interface UserInfoRepo extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+    Optional<User> findByEmailIgnoreCaseAndProvider(String email, String provider);
+    Optional<User> findByUsernameAndProvider(String username, String provider);
+
+    Optional<User> findByPhone(Long phone);
 }

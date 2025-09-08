@@ -10,6 +10,7 @@ import com.tusuapp.coreapi.models.dtos.bookings.RescheduleRequestDto;
 import com.tusuapp.coreapi.repositories.BookingRequestRepo;
 import com.tusuapp.coreapi.repositories.BookingRescheduleRepo;
 import com.tusuapp.coreapi.services.user.CreditService;
+import com.tusuapp.coreapi.services.user.notifications.NotificationService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,9 @@ public class RescheduleService {
     public static final String REQUESTED = "requested";
 
 
+    @Autowired
+    private NotificationService notificationService;
+
     public ResponseEntity<?> getPendingReschedules(String status){
         List<RescheduleRequest> requestList;
         if(isTutor()){
@@ -75,13 +79,12 @@ public class RescheduleService {
         if(localDateTime.isBefore(getCurrentUTCTime())){
             return errorResponse(HttpStatus.BAD_REQUEST,"Cannot reschedule to past time");
         }
-        System.out.println("utc time reschedule");
-        System.out.println(localDateTime);
         reschedule.setProposedDateTime(localDateTime);
         reschedule.setMessage(reschedule.getMessage());
         reschedule = rescheduleRepo.save(reschedule);
         request.setIsRescheduled(true);
         request.setStatus(STATUS_RESCHEDULED);
+        notificationService.sendRescheduleNotification(reschedule.getStudent(), reschedule.getTutor());
         bookingRepo.save(request);
         return ResponseEntity.ok().build();
     }
@@ -99,6 +102,7 @@ public class RescheduleService {
             rescheduleRequest.setStatus(REJECTED);
             rescheduleRequest.getBooking().setIsRescheduled(true);
             rescheduleRequest.getBooking().setStatus(STATUS_RESCHEDULED);
+            notificationService.sendRejectNotifications(rescheduleRequest.getStudent(), rescheduleRequest.getTutor());
             bookingRepo.save(rescheduleRequest.getBooking());
         }else {
             saveBookingRequest(rescheduleRequest);

@@ -181,6 +181,8 @@ public class BookingService {
     private void rejectBooking(BookingRequest request, ChangeBookingStatusDto changeStatusDto) {
         request.setStatus(STATUS_REJECTED);
         request.setRejectionReason(changeStatusDto.getMessage());
+        notificationService.sendRejectNotifications(request.getStudent(), request.getTutor());
+
     }
 
     public BookingRequest getBookingReadOnly(Long id) {

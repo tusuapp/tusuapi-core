@@ -2,11 +2,13 @@ package com.tusuapp.coreapi.security;
 
 
 import com.tusuapp.coreapi.services.auth.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,9 +37,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")
+                && !request.getRequestURI().endsWith("/login")
+                && !request.getRequestURI().endsWith("/register")) {
             token = authHeader.substring(7);
-            username = jwtService.extractUsername(token);
+            try {
+                username = jwtService.extractUsername(token);
+            }catch (ExpiredJwtException e){
+                System.out.println("JWT expired: " + e.getMessage());
+                response.setStatus(HttpStatus.PERMANENT_REDIRECT.value());
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Token has expired. Please log in again.\"}");
+            }
         }
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);

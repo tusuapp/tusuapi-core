@@ -46,11 +46,19 @@ public class TimeZoneConverter {
         slot.setEndTime(getLocalDateTime(slot.getEndTime()));
     }
 
+
     private static LocalDateTime getLocalDateTime(LocalDateTime utcTime) {
         ZoneId targetZone = ZoneId.of(getCurrentUserTimeZone());
         ZonedDateTime utcZoned = utcTime.atZone(ZoneId.of("UTC"));
         ZonedDateTime converted = utcZoned.withZoneSameInstant(targetZone);
         return converted.toLocalDateTime();
+    }
+
+    public static ZonedDateTime getZonedUserTime(LocalDateTime utcTime) {
+        ZoneId targetZone = ZoneId.of(getCurrentUserTimeZone());
+        ZonedDateTime utcZoned = utcTime.atZone(ZoneId.of("UTC"));
+        ZonedDateTime converted = utcZoned.withZoneSameInstant(targetZone);
+        return converted;
     }
 
     public static LocalDateTime getUtcDateTime(LocalDateTime tzDateTime) {
@@ -59,7 +67,7 @@ public class TimeZoneConverter {
         ZonedDateTime zonedDateTime = tzDateTime.atZone(targetZone);
         System.out.println("zonedDateTime " + zonedDateTime);
         ZonedDateTime utcZoned = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
-        System.out.println("Converted "  + utcZoned);
+        System.out.println("Converted " + utcZoned);
         return utcZoned.toLocalDateTime();
     }
 

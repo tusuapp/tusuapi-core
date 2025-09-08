@@ -1,0 +1,4 @@
+com:
+  baeldung:
+    sendgrid:
+      api-key: ${TUSU_SENDGRID_API}

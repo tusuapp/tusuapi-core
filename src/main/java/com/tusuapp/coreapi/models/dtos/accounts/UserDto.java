@@ -32,7 +32,9 @@ public class UserDto {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
-        dto.setCountry(CountryDto.fromCountry(user.getCountry()));
+        if(user.getCountry() !=null) {
+            dto.setCountry(CountryDto.fromCountry(user.getCountry()));
+        }
         dto.setTimeZone(user.getTimeZone());
         dto.setFullName(user.getFullName());
         dto.setIsActive(user.getIsActive());

@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
+
 @RestController
 @RequestMapping("/slots")
 public class SlotsController {
@@ -23,7 +25,10 @@ public class SlotsController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getSlots(@RequestParam Long tutorId, @RequestParam String date){
+    public ResponseEntity<?> getSlots(@RequestParam(required = false) Long tutorId, @RequestParam String date){
+        if(tutorId == null){
+            tutorId = getCurrentUserId();
+        }
         return slotService.getTutorSlots(tutorId,date);
     }
 

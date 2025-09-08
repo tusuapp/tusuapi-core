@@ -65,12 +65,12 @@ public class CreditService {
                 creditPoint.setUpdatedBy(getCurrentUserId());
                 notificationService.addNotification(studentId,
                         amount + " has been added to your account",
-                        "Payment has been success and points have been credited");
+                        "Payment has been success and points have been credited", true);
             } catch (Exception e) {
                 creditPoint.setUpdatedBy(-3L);
                 notificationService.addNotification(studentId,
                         amount + " has been refunded to your account",
-                        "Payment has been refunded and request have been cancelled");
+                        "Payment has been refunded and request have been cancelled", true);
             }
             creditPoint.setUpdatedAt(LocalDateTime.now());
             creditPointRepo.save(creditPoint);
