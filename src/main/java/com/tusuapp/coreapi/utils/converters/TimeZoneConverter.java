@@ -62,12 +62,9 @@ public class TimeZoneConverter {
     }
 
     public static LocalDateTime getUtcDateTime(LocalDateTime tzDateTime) {
-        System.out.println(getCurrentUserTimeZone());
         ZoneId targetZone = ZoneId.of(getCurrentUserTimeZone());
         ZonedDateTime zonedDateTime = tzDateTime.atZone(targetZone);
-        System.out.println("zonedDateTime " + zonedDateTime);
         ZonedDateTime utcZoned = zonedDateTime.withZoneSameInstant(ZoneId.of("UTC"));
-        System.out.println("Converted " + utcZoned);
         return utcZoned.toLocalDateTime();
     }
 

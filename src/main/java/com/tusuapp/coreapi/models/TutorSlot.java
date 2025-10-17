@@ -43,4 +43,8 @@ public class TutorSlot {
 
     @Column(name = "to_datetime")
     private LocalDateTime toDatetime;
+
+    @Column(name = "trial_slot")
+    private boolean isTrialSlot;
+
 }

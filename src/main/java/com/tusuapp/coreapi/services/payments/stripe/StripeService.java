@@ -157,7 +157,6 @@ public class StripeService {
                 return ResponseEntity.ok("Payment already completed");
             }
             Session session = Session.retrieve(paymentSession.getStripeSessionId());
-            System.out.println(session.getStatus());
             String message = "";
             if (!"complete".equals(session.getStatus())) {
                 //Add additional tracking items to keep this tracked

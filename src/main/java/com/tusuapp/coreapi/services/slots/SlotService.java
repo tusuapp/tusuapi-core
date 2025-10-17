@@ -28,15 +28,19 @@ public class SlotService {
     public ResponseEntity<?> createSlot(CreateSlotDto createSlotDto) {
         TutorSlot slot = new TutorSlot();
         slot.setFromDatetime(getUtcDateTime(createSlotDto.getFromDateTime()));
-        slot.setToDatetime(getUtcDateTime(createSlotDto.getFromDateTime().plusHours(1)));
-
+        System.out.println(createSlotDto);
+        if(createSlotDto.isTrialSlot()){
+            slot.setToDatetime(getUtcDateTime(createSlotDto.getFromDateTime().plusMinutes(15)));
+            slot.setTrialSlot(true);
+        }else{
+            slot.setToDatetime(getUtcDateTime(createSlotDto.getFromDateTime().plusHours(1)));
+        }
         List<TutorSlot> overLappingSlots = tutorSlotRepo.findOverlappingSlots(getCurrentUserId(),
                 slot.getFromDatetime(),
                 slot.getToDatetime());
         if (!overLappingSlots.isEmpty()) {
             return errorResponse(HttpStatus.BAD_REQUEST, "Overlapping slot found");
         }
-
         slot.setTutorId(getCurrentUserId());
         slot.setIsBooked(false);
         slot.setCreatedAt(LocalDateTime.now());

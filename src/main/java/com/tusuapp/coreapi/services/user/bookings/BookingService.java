@@ -127,7 +127,11 @@ public class BookingService {
         bookingRequest.setStartTime(tutorSlot.get().getFromDatetime());
         bookingRequest.setEndTime(tutorSlot.get().getToDatetime());
         Optional<TutorDetails> tutorDetails = tutorDetailRepo.findByUserId(bookingRequest.getTutor().getId());
-        bookingRequest.setHourlyCharge(tutorDetails.get().getHourlyCharge());
+        if(tutorSlot.get().isTrialSlot()){
+            bookingRequest.setHourlyCharge(0);
+        }else{
+            bookingRequest.setHourlyCharge(tutorDetails.get().getHourlyCharge());
+        }
         bookingRequest.setStatus(STATUS_CHECKOUT);
         bookingRequest = bookingRepo.save(bookingRequest);
         return ResponseEntity.ok(BookingRequestDto.fromBookingRequest(bookingRequest));

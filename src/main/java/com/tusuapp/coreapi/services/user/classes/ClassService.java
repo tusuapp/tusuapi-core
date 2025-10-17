@@ -55,11 +55,9 @@ public class ClassService {
             return ResponseEntity.ok(session);
         }
         String createdUrl = bbbService.generateCreateUrl(session);
-        System.out.println(createdUrl);
         String response = restClient(RestClient.builder(), createdUrl).get().retrieve().body(String.class);
         String studentUrl = generateBBBUrl(session.getBooking().getStudent(), meetingId, session.getStudentPass());
         String tutorUrl = generateBBBUrl(session.getBooking().getTutor(), meetingId, session.getTutorPass());
-        System.out.println(response);
         if (response.contains("FAILED")) {
             return errorResponse(HttpStatus.BAD_GATEWAY, "Unable to create session");
         }

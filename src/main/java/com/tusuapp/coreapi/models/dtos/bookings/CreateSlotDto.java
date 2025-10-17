@@ -12,4 +12,7 @@ public class CreateSlotDto {
     private LocalDateTime fromDateTime;
     private LocalDateTime toDateTime;
 
+    @JsonProperty("isTrialSlot")
+    private boolean isTrialSlot;
+
 }

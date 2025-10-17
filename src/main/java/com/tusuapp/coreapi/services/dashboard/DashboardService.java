@@ -36,7 +36,6 @@ public class DashboardService {
         JSONObject response = new JSONObject();
         Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
         List<BookingRequest> requestList = bookingsRepo.findAllByTutorIdAndStatusIn(tutorId, listOf("requested"), pageable);
-        System.out.println(requestList.size());
         List<BookingRequestDto> requestsDto = requestList.stream().map(BookingRequestDto::fromBookingRequest).toList();
         response.put("bookingRequests", requestsDto);
         List<BookingRequest> upcomingAccepted = bookingsRepo
