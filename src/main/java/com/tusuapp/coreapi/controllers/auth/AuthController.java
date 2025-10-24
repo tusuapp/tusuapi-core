@@ -1,6 +1,7 @@
 package com.tusuapp.coreapi.controllers.auth;
 
 
+import com.tusuapp.coreapi.models.TutorDetails;
 import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.auth.RegistrationRequest;
@@ -121,7 +122,12 @@ public class AuthController {
 
         // Attach timezone details
         Map<String, Object> response = new HashMap<>();
-        response.put("user", UserDto.fromUser(user));
+        UserDto userDto = UserDto.fromUser(user);
+        if(userDto.getRole().getName().equalsIgnoreCase("Tutor")){
+            Optional<TutorDetails> tutorDetails = tutorDetailRepo.findByUserId(user.getId());
+            userDto.setCompleteProfile(tutorDetails.isPresent());
+        }
+        response.put("user", userDto);
         response.put("timezone", user.getTimeZone());
         response.put("timezone_offset", user.getTimeZoneOffset());
         response.put("jwt", jwt);

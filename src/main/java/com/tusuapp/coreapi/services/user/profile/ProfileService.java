@@ -52,11 +52,12 @@ public class ProfileService {
     private ResponseEntity<?> getTutorProfile(Long tutorId) {
         User user = userRepo.findById(tutorId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        TutorDetails tutorDetails = tutorDetailRepo.findByUserId(tutorId)
-                .orElseThrow(() -> new IllegalArgumentException("No tutor details found, profile might not be completed"));
+        Optional<TutorDetails> tutorDetails = tutorDetailRepo.findByUserId(tutorId);
+        UserDto userDto = UserDto.fromUser(user);
+        userDto.setCompleteProfile(tutorDetails.isPresent());
         JSONObject response = new JSONObject();
-        response.put("tutor", UserDto.fromUser(user));
-        response.put("tutorDetails", tutorDetails);
+        response.put("tutor", userDto);
+        response.put("tutorDetails", tutorDetails.get());
         return ResponseEntity.ok(response.toMap());
     }
 

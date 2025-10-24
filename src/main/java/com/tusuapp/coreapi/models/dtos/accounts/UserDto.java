@@ -35,6 +35,7 @@ public class UserDto {
         if(user.getCountry() !=null) {
             dto.setCountry(CountryDto.fromCountry(user.getCountry()));
         }
+        dto.setRole(new Role(user.getRole()));
         dto.setTimeZone(user.getTimeZone());
         dto.setFullName(user.getFullName());
         dto.setIsActive(user.getIsActive());
