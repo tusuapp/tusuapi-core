@@ -12,5 +12,5 @@ public interface UserInfoRepo extends JpaRepository<User, Long> {
     Optional<User> findByEmailIgnoreCaseAndProvider(String email, String provider);
     Optional<User> findByUsernameAndProvider(String username, String provider);
 
-    Optional<User> findByPhone(Long phone);
+    Optional<User> findByPhone(String phone);
 }

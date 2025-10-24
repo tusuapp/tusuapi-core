@@ -18,5 +18,11 @@ public class OTPUtil {
         return builder.toString();
     }
 
+    public static String generateOTP4()
+    {
+        Random random = new Random();
+        return String.format("%04d", random.nextInt(1_000_0));
+    }
+
 
 }

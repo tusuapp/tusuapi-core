@@ -8,7 +8,7 @@ public class UpdateProfileDto {
 
     private String fullName;
     private String email;
-    private Long phone;
+    private String phone;
     private String description;
     private Integer countryId;
     private Integer countryCode;

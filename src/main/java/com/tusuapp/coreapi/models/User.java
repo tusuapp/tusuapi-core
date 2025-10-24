@@ -23,7 +23,7 @@ public class User {
     private Boolean confirmed;
     private Boolean blocked;
     private Integer role;
-    private Long phone;
+    private String phone;
     @Column(name = "is_mobile_verified")
     private Boolean isMobileVerified;
     @Column(name = "fullname")

@@ -108,6 +108,11 @@
 			<artifactId>sendgrid-java</artifactId>
 			<version>4.10.2</version>
 		</dependency>
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>11.0.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

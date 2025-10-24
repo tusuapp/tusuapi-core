@@ -10,14 +10,16 @@ import com.tusuapp.coreapi.repositories.BookingRequestRepo;
 import com.tusuapp.coreapi.repositories.CountryRepo;
 import com.tusuapp.coreapi.repositories.TutorDetailRepo;
 import com.tusuapp.coreapi.repositories.UserInfoRepo;
+import jakarta.persistence.EntityNotFoundException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 
-import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
+import static com.tusuapp.coreapi.utils.SessionUtil.*;
 
 @Service
 public class ProfileService {
@@ -99,5 +101,16 @@ public class ProfileService {
 
     public ResponseEntity<?> getTutorProfileWithId(Long id) {
         return getTutorProfile(id);
+    }
+
+    public ResponseEntity<?> getCurrentUser() {
+        User user = userRepo.findById(getCurrentUserId()).orElseThrow(()->new EntityNotFoundException("Invalid user"));
+        UserDto userDto = UserDto.fromUser(user);
+        userDto.setRole(new UserDto.Role(isStudent() ? 3 : 4));
+        if (isTutor()) {
+            Optional<TutorDetails> details = tutorDetailRepo.findByUserId(user.getId());
+            userDto.setCompleteProfile(details.isPresent());
+        }
+        return ResponseEntity.ok(userDto);
     }
 }
