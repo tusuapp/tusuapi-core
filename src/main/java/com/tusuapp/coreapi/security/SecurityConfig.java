@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers( "/home", "/error").permitAll()
                         .requestMatchers( "/auth/**").permitAll()
+                        .requestMatchers("/dropdowns").permitAll()
                         .requestMatchers("/user/classes/tutor/bookings/**").hasRole("TUTOR")
                         .anyRequest().authenticated()
                 )

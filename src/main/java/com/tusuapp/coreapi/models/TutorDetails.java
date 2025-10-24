@@ -2,10 +2,7 @@ package com.tusuapp.coreapi.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.cglib.core.Local;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -66,6 +63,6 @@ public class TutorDetails {
             joinColumns = @JoinColumn(name = "tutor-detail_id"),
             inverseJoinColumns = @JoinColumn(name = "locale_id")
     )
-    private List<Locale> languages;
+    private List<LanguageLocale> languages;
 
 }

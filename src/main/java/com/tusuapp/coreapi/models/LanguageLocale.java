@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "i18n_locales")
-public class Locale {
+public class LanguageLocale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

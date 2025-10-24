@@ -14,6 +14,7 @@ public class UpdateProfileDto {
     private Integer countryCode;
     private String timezone;
     private Integer experience;
+    private String gender;
     private String address;
     private List<Long> subjects;
     private List<Long> languages;
