@@ -4,6 +4,7 @@ import com.tusuapp.coreapi.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,4 +14,6 @@ public interface UserInfoRepo extends JpaRepository<User, Long> {
     Optional<User> findByUsernameAndProvider(String username, String provider);
 
     Optional<User> findByPhone(String phone);
+
+    List<User> findByRole(int role);
 }

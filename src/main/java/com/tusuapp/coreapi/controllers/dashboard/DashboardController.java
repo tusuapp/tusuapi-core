@@ -24,5 +24,11 @@ public class DashboardController {
     }
 
 
+    @GetMapping("/student/dashboard")
+    public ResponseEntity<?> getStudentDashboard(){
+        return dashboardService.getStudentDashboard();
+    }
+
+
 }
 

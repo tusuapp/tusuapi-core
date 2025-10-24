@@ -11,6 +11,11 @@ import java.util.Optional;
 
 
 public class SessionUtil {
+
+    public static final int ROLE_TUTOR_ID = 4;
+    public static final int ROLE_STUDENT_ID = 4;
+
+
     public static Long getCurrentUserId(){
         TusuUserDetail user = (TusuUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return Long.valueOf(user.getUsername());

@@ -3,9 +3,13 @@ package com.tusuapp.coreapi.services.dashboard;
 import com.tusuapp.coreapi.constants.BookingConstants;
 import com.tusuapp.coreapi.models.BookingRequest;
 import com.tusuapp.coreapi.models.CredPointMaster;
+import com.tusuapp.coreapi.models.User;
+import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.bookings.BookingRequestDto;
 import com.tusuapp.coreapi.repositories.BookingRequestRepo;
 import com.tusuapp.coreapi.repositories.CreditPointRepo;
+import com.tusuapp.coreapi.repositories.UserInfoRepo;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -17,19 +21,19 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.tusuapp.coreapi.utils.SessionUtil.ROLE_TUTOR_ID;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.getCurrentUTCTime;
 import static org.hibernate.internal.util.collections.CollectionHelper.listOf;
 
 
 @Service
+@RequiredArgsConstructor
 public class DashboardService {
 
-    @Autowired
-    private BookingRequestRepo bookingsRepo;
-
-    @Autowired
-    private CreditPointRepo creditPointRepo;
+    private final BookingRequestRepo bookingsRepo;
+    private final CreditPointRepo creditPointRepo;
+    private final UserInfoRepo userRepo;
 
     public ResponseEntity<?> getTutorDashboard() {
         Long tutorId = getCurrentUserId();
@@ -50,7 +54,18 @@ public class DashboardService {
         response.put("totalEarning", 0);
         credits.ifPresent(credPointMaster -> response.put("totalEarning", credPointMaster.getBalance()));
         return ResponseEntity.ok(response.toMap());
+    }
 
+    public ResponseEntity<?> getStudentDashboard(){
+        Pageable pageable = PageRequest.of(0, 4, Sort.by("createdAt").descending());
+        List<BookingRequest> requestList = bookingsRepo.findAllByStudentIdAndStatusIn(getCurrentUserId(), listOf("accepted", "requested"), pageable);
+        List<BookingRequestDto> requestDtos = requestList.stream().map(BookingRequestDto::fromBookingRequest).toList();
+        List<User> tutors = userRepo.findByRole(ROLE_TUTOR_ID);
+        List<UserDto> tutorDtos = tutors.stream().map(UserDto::fromUser).toList();
+        JSONObject response = new JSONObject();
+        response.put("upcomingClasses", requestDtos);
+        response.put("popularTutors", tutorDtos);
+        return ResponseEntity.ok(response.toMap());
     }
 
 }
