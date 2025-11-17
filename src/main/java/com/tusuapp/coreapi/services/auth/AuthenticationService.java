@@ -37,7 +37,7 @@ public class AuthenticationService {
     private final SignUpVerificationRepo verificationRepo;
     private final EmailService emailService;
     private final SMSService smsService;
-    public static final String VERIFICATION_LINK = "http://localhost:3000/signup/verification/email-verify?token=";
+    public static final String VERIFICATION_LINK = "https://tusuapp.com/signup/verification/email-verify?token=";
     private final UserInfoRepo userRepo;
     private final UserInfoRepo userInfoRepo;
     private final TutorDetailRepo tutorDetailRepo;
