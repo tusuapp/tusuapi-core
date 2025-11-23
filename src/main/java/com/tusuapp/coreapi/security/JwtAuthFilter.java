@@ -48,6 +48,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 response.setStatus(HttpStatus.PERMANENT_REDIRECT.value());
                 response.setContentType("application/json");
                 response.getWriter().write("{\"error\": \"Token has expired. Please log in again.\"}");
+                return;
             }
         }
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

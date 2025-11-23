@@ -4,6 +4,7 @@ import com.tusuapp.coreapi.models.TutorDetails;
 import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.accounts.UpdateProfileDto;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
+import com.tusuapp.coreapi.models.dtos.auth.ResetPasswordDto;
 import com.tusuapp.coreapi.services.user.profile.ProfileService;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,11 @@ public class ProfileController {
     @GetMapping("/me")
     public ResponseEntity<?> getAuthUser() {
         return profileService.getCurrentUser();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
+        return profileService.resetPassword(resetPasswordDto);
     }
 
 

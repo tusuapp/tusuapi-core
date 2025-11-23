@@ -5,6 +5,7 @@ import com.tusuapp.coreapi.models.TutorDetails;
 import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.auth.RegistrationRequest;
+import com.tusuapp.coreapi.models.dtos.auth.ResetPasswordDto;
 import com.tusuapp.coreapi.repositories.CountryRepo;
 import com.tusuapp.coreapi.repositories.TutorDetailRepo;
 import com.tusuapp.coreapi.repositories.UserInfoRepo;
@@ -151,8 +152,10 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(String email) {
-        return null;
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        return authenticationService.forgotPassword(email);
     }
+
+
 
 }

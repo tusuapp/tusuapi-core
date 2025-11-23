@@ -72,4 +72,21 @@ public class JwtService {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
+
+    public String generateShortToken(String id, String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", id);
+        claims.put("email", email);
+        return createShortToken(claims, email);
+    }
+
+    private String createShortToken(Map<String, Object> claims, String email) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
 }

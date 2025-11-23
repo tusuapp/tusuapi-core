@@ -4,14 +4,17 @@ import com.tusuapp.coreapi.constants.BookingConstants;
 import com.tusuapp.coreapi.models.*;
 import com.tusuapp.coreapi.models.dtos.accounts.UpdateProfileDto;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
+import com.tusuapp.coreapi.models.dtos.auth.ResetPasswordDto;
 import com.tusuapp.coreapi.repositories.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.tusuapp.coreapi.utils.SessionUtil.*;
@@ -26,6 +29,7 @@ public class ProfileService {
     private final CountryRepo countryRepo;
     private final CategoryRepo categoryRepo;
     private final LanguageLocalRepo languageRepo;
+    private final PasswordEncoder passwordEncoder;
 
 
     public ResponseEntity<?> getUserTotalClassesCount() {
@@ -116,5 +120,16 @@ public class ProfileService {
             userDto.setCompleteProfile(details.isPresent());
         }
         return ResponseEntity.ok(userDto);
+    }
+
+    public ResponseEntity<?> resetPassword(ResetPasswordDto resetPasswordDto) {
+        User user = userRepo.findById(getCurrentUserId()).orElseThrow(() -> new EntityNotFoundException("Token expired"));
+        if (!resetPasswordDto.getPassword().equals(resetPasswordDto.getConfirmPassword())) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Passwords do not match"));
+        }
+        user.setPassword(passwordEncoder.encode(resetPasswordDto.getPassword()));
+        userRepo.save(user);
+        return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
     }
 }

@@ -5,6 +5,7 @@ import com.tusuapp.coreapi.models.SignUpVerification;
 import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.auth.RegistrationRequest;
+import com.tusuapp.coreapi.models.dtos.auth.ResetPasswordDto;
 import com.tusuapp.coreapi.repositories.CountryRepo;
 import com.tusuapp.coreapi.repositories.SignUpVerificationRepo;
 import com.tusuapp.coreapi.repositories.TutorDetailRepo;
@@ -137,4 +138,14 @@ public class AuthenticationService {
         verification = verificationRepo.save(verification);
         return ResponseEntity.ok("OTP Verified");
     }
+
+    public ResponseEntity<?> forgotPassword(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Current user not found"));
+        String jwt = jwtService.generateShortToken(user.getId().toString(), user.getEmail());
+        String resetLink = "https://tusuapp.com/accounts/reset-password?token=" + jwt;
+        emailService.sendForgotPasswordEmail(email,resetLink);
+        return ResponseEntity.ok().build();
+    }
+
+
 }
