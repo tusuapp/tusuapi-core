@@ -1,6 +1,9 @@
 package com.tusuapp.coreapi.security;
 
 
+import com.tusuapp.coreapi.services.auth.AdminInfoService;
+import com.tusuapp.coreapi.services.auth.UserInfoService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,17 +27,12 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
-    private final UserDetailsService userDetailsService;
-
-    // Constructor injection for required dependencies
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter,
-                          UserDetailsService userDetailsService) {
-        this.jwtAuthFilter = jwtAuthFilter;
-        this.userDetailsService = userDetailsService;
-    }
+    private final UserInfoService userDetailsService;
+    private final AdminInfoService adminInfoService;
 
     /*
      * Main security configuration
@@ -49,11 +47,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers( "/home", "/error").permitAll()
                         .requestMatchers( "/auth/**").permitAll()
+                        .requestMatchers("/admin/auth/login").permitAll()
                         .requestMatchers("/dropdowns").permitAll()
                         .requestMatchers("/user/classes/tutor/bookings/**").hasRole("TUTOR")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
+                .authenticationProvider(adminAuthenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -81,6 +81,13 @@ public class SecurityConfig {
         return provider;
     }
 
+    @Bean
+    public AuthenticationProvider adminAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(adminInfoService); // Connects to Admin Table
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
     /*
      * Authentication manager bean
      * Required for programmatic authentication (e.g., in /generateToken)
