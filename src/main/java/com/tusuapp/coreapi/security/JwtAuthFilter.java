@@ -71,13 +71,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
     protected void doFilterAdminInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader("Cookie");
+        String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")
                 && !request.getRequestURI().endsWith("/login")) {
             token = authHeader.substring(7);
+            System.out.println("Checking token " + token);
             try {
                 username = jwtService.extractEmail(token);
             }catch (ExpiredJwtException e){
