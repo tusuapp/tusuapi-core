@@ -47,6 +47,11 @@ public class JwtService {
         return String.valueOf(claims.get("id"));
     }
 
+    public String extractEmail(String token) {
+        Claims claims = extractAllClaims(token);
+        return String.valueOf(claims.get("email"));
+    }
+
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }

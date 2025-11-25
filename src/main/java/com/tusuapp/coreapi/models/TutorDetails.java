@@ -1,22 +1,24 @@
 package com.tusuapp.coreapi.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
 @Entity
 @Table(name = "tutor_details")
+@Getter
+@Setter
 public class TutorDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -27,6 +29,11 @@ public class TutorDetails {
     private Double hourlyCharge;
 
     private String gender;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
+    private User user;
 
     @Column(name = "created_by")
     private Integer createdBy;

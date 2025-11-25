@@ -71,16 +71,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
     protected void doFilterAdminInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader("Cookie");
         String token = null;
         String username = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")
+        if (authHeader != null && authHeader.startsWith("auth_token=")
                 && !request.getRequestURI().endsWith("/login")) {
-            token = authHeader.substring(7);
-
+            token = authHeader.split("=")[1];
             try {
-                username = jwtService.extractUsername(token);
+                username = jwtService.extractEmail(token);
             }catch (ExpiredJwtException e){
                 System.out.println("JWT expired: " + e.getMessage());
                 response.setStatus(HttpStatus.PERMANENT_REDIRECT.value());

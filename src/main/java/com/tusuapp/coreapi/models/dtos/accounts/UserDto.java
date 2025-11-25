@@ -17,6 +17,7 @@ public class UserDto {
     private String timeZone;
     private Boolean isActive;
     private String fullName;
+    private boolean confirmed;
     private String imageUrl;
     private Role role;
     private boolean isEmailVerified;
@@ -32,6 +33,7 @@ public class UserDto {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
+        dto.setConfirmed(user.getConfirmed());
         if(user.getCountry() !=null) {
             dto.setCountry(CountryDto.fromCountry(user.getCountry()));
         }
