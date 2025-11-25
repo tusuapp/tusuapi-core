@@ -75,9 +75,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
-        if (authHeader != null && authHeader.startsWith("auth_token=")
+        if (authHeader != null && authHeader.startsWith("Bearer ")
                 && !request.getRequestURI().endsWith("/login")) {
-            token = authHeader.split("=")[1];
+            token = authHeader.substring(7);
             try {
                 username = jwtService.extractEmail(token);
             }catch (ExpiredJwtException e){
