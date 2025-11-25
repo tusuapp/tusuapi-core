@@ -1,19 +1,15 @@
 package com.tusuapp.coreapi.services.admin.tutors;
 
-import com.tusuapp.coreapi.models.TutorDetails;
 import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.TutorDetailsDto;
-import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.repositories.TutorDetailRepo;
 import com.tusuapp.coreapi.repositories.UserInfoRepo;
-import com.tusuapp.coreapi.services.auth.UserInfoService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
-import static com.tusuapp.coreapi.constants.AccountConstants.ROLE_TUTOR;
 
 /**
  * AdminTutorService created by Rithik S(coderithik@gmail.com)
@@ -25,10 +21,17 @@ public class AdminTutorService {
     private final TutorDetailRepo tutorDetailRepo;
     private final UserInfoRepo userInfoRepo;
 
-    public ResponseEntity<?> getTutors(){
-        List<TutorDetails> tutors = tutorDetailRepo.findAll();
-        List<TutorDetailsDto> tutorDtos = tutors.stream().map(TutorDetailsDto::fromEntity).toList();
-        return ResponseEntity.ok(tutorDtos);
+    public ResponseEntity<?> getTutors() {
+        List<User> users = userInfoRepo.findAll();
+        List<TutorDetailsDto> userDtos = users.stream().map(TutorDetailsDto::fromUser).toList();
+        return ResponseEntity.ok(userDtos);
+    }
+
+    public ResponseEntity<?> approveTutor(Long tutorId) {
+        User users = userInfoRepo.findById(tutorId).orElseThrow(() -> new EntityNotFoundException("Tutor not found"));
+        users.setConfirmed(true);
+        userInfoRepo.save(users);
+        return ResponseEntity.ok().build();
     }
 
 }

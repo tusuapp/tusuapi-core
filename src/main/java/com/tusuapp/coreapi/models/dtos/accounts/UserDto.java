@@ -24,6 +24,7 @@ public class UserDto {
     private String timeZoneOffset;
     private boolean isCompleteProfile;
     private String address;
+    private boolean isTutorApprovalPending;
 
 
 

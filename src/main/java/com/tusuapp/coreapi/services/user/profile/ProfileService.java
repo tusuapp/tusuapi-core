@@ -117,7 +117,13 @@ public class ProfileService {
         userDto.setRole(new UserDto.Role(isStudent() ? 3 : 4));
         if (isTutor()) {
             Optional<TutorDetails> details = tutorDetailRepo.findByUserId(user.getId());
-            userDto.setCompleteProfile(details.isPresent());
+            if (details.isPresent()) {
+                System.out.println(details.get());
+                boolean isProfileComplete = details.get().getLanguages().size() > 0 && details.get().getDisciplines().size() > 0
+                        && details.get().getHourlyCharge() != null && details.get().getExperience() != null;
+                userDto.setCompleteProfile(isProfileComplete);
+                userDto.setTutorApprovalPending(!user.getConfirmed());
+            }
         }
         return ResponseEntity.ok(userDto);
     }

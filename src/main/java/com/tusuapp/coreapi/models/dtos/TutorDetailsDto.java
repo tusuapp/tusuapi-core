@@ -21,15 +21,16 @@ public class TutorDetailsDto {
     private Long userId;
     private String fullName;
     private String email;
+    private boolean approved;
     private String userImageUrl;
     private String description;
     private Integer experience;
     private Double hourlyCharge;
+    private boolean confirmed;
     private String gender;
     private List<CategoryDto> subjects;
     private List<CategoryDto> disciplines;
     private List<LanguageLocale> languages;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -84,6 +85,23 @@ public class TutorDetailsDto {
             dto.setLanguages(languageDtos);
         } else {
             dto.setLanguages(Collections.emptyList());
+        }
+        return dto;
+    }
+
+    public static TutorDetailsDto fromUser(User user) {
+        if (user == null) {
+            return null;
+        }
+        TutorDetailsDto dto = new TutorDetailsDto();
+        dto.setId(user.getId());
+        dto.setUserId(user.getId());
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
+        dto.setUserImageUrl(user.getImageUrl());
+        dto.setConfirmed(user.getConfirmed());
+        if (user.getTutorDetails() != null) {
+            dto.setApproved(true);
         }
         return dto;
     }

@@ -101,10 +101,10 @@ public class AuthController {
         returnResult.put("blocked", user.getBlocked());
         returnResult.put("confirmed", user.getConfirmed());
 
-        if (!user.getConfirmed()) {
-            returnResult.put("message", "Waiting for admin approval");
-            return ResponseEntity.status(403).body(returnResult);
-        }
+//        if (!user.getConfirmed()) {
+//            returnResult.put("message", "Waiting for admin approval");
+//            return ResponseEntity.status(403).body(returnResult);
+//        }
 
         if (user.getBlocked()) {
             returnResult.put("message", "Your account is blocked. Please contact our administration");

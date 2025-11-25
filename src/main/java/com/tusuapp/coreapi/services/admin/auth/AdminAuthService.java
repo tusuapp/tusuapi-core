@@ -30,7 +30,6 @@ public class AdminAuthService {
     private final JwtService jwtService;
 
     public ResponseEntity<?> loginAdmin(LoginDto loginDto) {
-        System.out.println(encoder.encode(loginDto.getPassword()));
         TusuAdmin admin = adminRepo.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
         if (!encoder.matches(loginDto.getPassword(), admin.getPassword())) {

@@ -2,7 +2,9 @@ package com.tusuapp.coreapi.services.auth;
 
 import com.tusuapp.coreapi.models.Country;
 import com.tusuapp.coreapi.models.SignUpVerification;
+import com.tusuapp.coreapi.models.TutorDetails;
 import com.tusuapp.coreapi.models.User;
+import com.tusuapp.coreapi.models.dtos.TutorDetailsDto;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.auth.RegistrationRequest;
 import com.tusuapp.coreapi.models.dtos.auth.ResetPasswordDto;
@@ -82,6 +84,7 @@ public class AuthenticationService {
         if (existingUser.isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("error", "The given email already exists."));
         }
+
         if ("normal".equalsIgnoreCase(request.getLoginAccess())) {
             Optional<User> phoneUser = userInfoRepo.findByPhone(request.getPhone());
             if (phoneUser.isPresent()) {
@@ -114,6 +117,11 @@ public class AuthenticationService {
         }
         user.setCountry(country.get());
         User savedUser = userInfoRepo.save(user);
+        if(request.getRole().equalsIgnoreCase("tutor")){
+            TutorDetails tutorDetails = new TutorDetails();
+            tutorDetails.setUser(savedUser);
+            tutorDetailRepo.save(tutorDetails);
+        }
         String sessionId = generateRegisterVerifications(savedUser);
         String jwt = jwtService.generateToken(savedUser.getId().toString(), savedUser.getEmail());
         Map<String, Object> response = new HashMap<>();
