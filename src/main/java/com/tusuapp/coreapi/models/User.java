@@ -2,6 +2,10 @@ package com.tusuapp.coreapi.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 
 
 @Entity(name = "User")
@@ -56,4 +60,8 @@ public class User {
     private Integer createdBy;
     @Column(name = "image_url")
     private String imageUrl;
+    @CreationTimestamp
+    private Instant createdAt;
+    @UpdateTimestamp
+    private Instant updatedAt;
 }

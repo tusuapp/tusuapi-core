@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -31,8 +32,8 @@ public class TutorDetailsDto {
     private List<CategoryDto> subjects;
     private List<CategoryDto> disciplines;
     private List<LanguageLocale> languages;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     public static TutorDetailsDto fromEntity(TutorDetails entity) {
         if (entity == null) {
@@ -48,6 +49,7 @@ public class TutorDetailsDto {
         dto.setUpdatedAt(entity.getUpdatedAt());
         if (entity.getUser() != null) {
             User user = entity.getUser();
+            dto.setConfirmed(user.getConfirmed());
             dto.setUserId(user.getId());
             dto.setFullName(user.getFullName());
             dto.setEmail(user.getEmail());
@@ -100,6 +102,7 @@ public class TutorDetailsDto {
         dto.setEmail(user.getEmail());
         dto.setUserImageUrl(user.getImageUrl());
         dto.setConfirmed(user.getConfirmed());
+        dto.setCreatedAt(user.getCreatedAt());
         if (user.getTutorDetails() != null) {
             dto.setApproved(true);
         }

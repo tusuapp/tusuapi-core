@@ -77,7 +77,9 @@ public class ProfileService {
         if (null != updateDto.getFullName()) {
             user.setFullName(updateDto.getFullName());
         }
-        user.setPhone(updateDto.getPhone());
+        if(updateDto.getPhone() != null && updateDto.getPhone().length()>5) {
+            user.setPhone(updateDto.getPhone());
+        }
         //update country
         Country country = countryRepo.findById(updateDto.getCountryId())
                 .orElseThrow(() -> new IllegalArgumentException("No country found"));

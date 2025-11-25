@@ -1,5 +1,6 @@
 package com.tusuapp.coreapi.services.admin.tutors;
 
+import com.tusuapp.coreapi.models.TutorDetails;
 import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.TutorDetailsDto;
 import com.tusuapp.coreapi.repositories.TutorDetailRepo;
@@ -22,8 +23,8 @@ public class AdminTutorService {
     private final UserInfoRepo userInfoRepo;
 
     public ResponseEntity<?> getTutors() {
-        List<User> users = userInfoRepo.findAll();
-        List<TutorDetailsDto> userDtos = users.stream().map(TutorDetailsDto::fromUser).toList();
+        List<TutorDetails> tutors = tutorDetailRepo.findAll();
+        List<TutorDetailsDto> userDtos = tutors.stream().map(TutorDetailsDto::fromEntity).toList();
         return ResponseEntity.ok(userDtos);
     }
 
