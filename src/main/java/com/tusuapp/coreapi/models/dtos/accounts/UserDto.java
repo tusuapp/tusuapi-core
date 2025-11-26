@@ -21,6 +21,7 @@ public class UserDto {
     private String imageUrl;
     private Role role;
     private boolean isEmailVerified;
+    private boolean isMobileVerified;
     private String timeZoneOffset;
     private boolean isCompleteProfile;
     private String address;
@@ -46,6 +47,7 @@ public class UserDto {
         dto.setEmailVerified(user.getIsEmailVerified());
         dto.setTimeZoneOffset(user.getTimeZoneOffset());
         dto.setAddress(user.getAddress());
+        dto.setMobileVerified(user.getIsMobileVerified());
         return dto;
     }
 

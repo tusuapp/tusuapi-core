@@ -3,6 +3,7 @@ package com.tusuapp.coreapi.cron;
 import com.tusuapp.coreapi.constants.BookingConstants;
 import com.tusuapp.coreapi.models.BookingRequest;
 import com.tusuapp.coreapi.models.SignUpVerification;
+import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.repositories.SignUpVerificationRepo;
 import com.tusuapp.coreapi.repositories.UserInfoRepo;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +28,11 @@ public class OTPResetter {
 
 
 
-    @Scheduled(fixedDelay = 30 *  1000)
-    public void deleteAccountAbandoned() {
-        List<SignUpVerification> requests = verificationRepo.findAllByCreatedAtBeforeAndIsEmailVerifiedFalseOrIsPhoneVerifiedFalse(getCurrentUTCTime());;
-        List<Long> usersToDelete = requests.stream().map(v->v.getUser().getId()).toList();
-        userRepo.deleteAllById(usersToDelete);
-        System.out.println("Deleted " + usersToDelete.size() + " accounts");
-    }
+//    @Scheduled(fixedDelay = 30 *  1000)
+//    public void deleteAccountAbandoned() {
+//        List<User> users = userRepo.findAllByCreatedAtBeforeAndIsPhoneVerifiedFalse(getCurrentUTCTime());;
+////        List<Long> usersToDelete = requests.stream().map(v->v.getUser().getId()).toList();
+//        userRepo.deleteAll(users);
+//        System.out.println("Deleted " + users.size() + " accounts");
+//    }
 }

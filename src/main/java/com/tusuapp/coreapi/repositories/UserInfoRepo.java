@@ -1,11 +1,13 @@
 package com.tusuapp.coreapi.repositories;
 
+import com.tusuapp.coreapi.models.SignUpVerification;
 import com.tusuapp.coreapi.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,4 +28,6 @@ public interface UserInfoRepo extends JpaRepository<User, Long> {
            AND u.role = :role
     """)
     List<User> searchTutors(@Param("searchKey") String searchKey, @Param("role") Integer role);
+
+    List<User> findAllByCreatedAtBeforeAndIsMobileVerifiedFalse(LocalDateTime currentUTCTime);
 }
