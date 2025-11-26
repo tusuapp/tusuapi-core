@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity(name = "v2_booking_session")
+@Entity(name = "booking_sessions")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

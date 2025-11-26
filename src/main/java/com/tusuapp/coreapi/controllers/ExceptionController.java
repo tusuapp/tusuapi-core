@@ -49,4 +49,12 @@ public class ExceptionController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.toMap());
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleNotFound(Exception e) {
+        JSONObject response = new JSONObject();
+        response.put("error", e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.toMap());
+    }
+
 }

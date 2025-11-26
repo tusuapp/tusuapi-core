@@ -9,7 +9,7 @@ import java.time.Instant;
 
 
 @Entity(name = "User")
-@Table(name = "users-permissions_user")
+@Table(name = "tusu_users")
 @Getter
 @Setter
 @AllArgsConstructor

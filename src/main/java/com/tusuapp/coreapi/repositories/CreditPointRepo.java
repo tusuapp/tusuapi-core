@@ -1,13 +1,12 @@
 package com.tusuapp.coreapi.repositories;
 
 
-import com.tusuapp.coreapi.models.CredPointMaster;
+import com.tusuapp.coreapi.models.UserWallet;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
-public interface CreditPointRepo extends JpaRepository<CredPointMaster,Long> {
-    Optional<CredPointMaster> findByUserId(Long studentId);
+public interface CreditPointRepo extends JpaRepository<UserWallet,Long> {
+    Optional<UserWallet> findByUserId(Long studentId);
 }

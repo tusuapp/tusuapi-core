@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "v2_reschedule_requests")
+@Table(name = "reschedule_requests")
 public class RescheduleRequest {
 
     @Id

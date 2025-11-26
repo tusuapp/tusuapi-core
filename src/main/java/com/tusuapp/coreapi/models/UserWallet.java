@@ -2,16 +2,16 @@ package com.tusuapp.coreapi.models;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "cred_point_master", schema = "tusu")
+@Table(name = "user_wallets", schema = "tusu")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CredPointMaster {
+public class UserWallet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -37,6 +37,8 @@ public class SignUpVerification {
     private boolean isEmailVerified;
     private boolean isPhoneVerified;
 
+    private boolean isActioned;
+
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

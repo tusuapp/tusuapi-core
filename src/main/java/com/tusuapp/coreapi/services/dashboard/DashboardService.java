@@ -2,7 +2,7 @@ package com.tusuapp.coreapi.services.dashboard;
 
 import com.tusuapp.coreapi.constants.BookingConstants;
 import com.tusuapp.coreapi.models.BookingRequest;
-import com.tusuapp.coreapi.models.CredPointMaster;
+import com.tusuapp.coreapi.models.UserWallet;
 import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.bookings.BookingRequestDto;
@@ -11,7 +11,6 @@ import com.tusuapp.coreapi.repositories.CreditPointRepo;
 import com.tusuapp.coreapi.repositories.UserInfoRepo;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -50,9 +49,9 @@ public class DashboardService {
                 );
         List<BookingRequestDto> upcomingDto = upcomingAccepted.stream().map(BookingRequestDto::fromBookingRequest).toList();
         response.put("upcomingClasses", upcomingDto);
-        Optional<CredPointMaster> credits = creditPointRepo.findByUserId(getCurrentUserId());
+        Optional<UserWallet> credits = creditPointRepo.findByUserId(getCurrentUserId());
         response.put("totalEarning", 0);
-        credits.ifPresent(credPointMaster -> response.put("totalEarning", credPointMaster.getBalance()));
+        credits.ifPresent(userWallet -> response.put("totalEarning", userWallet.getBalance()));
         return ResponseEntity.ok(response.toMap());
     }
 

@@ -8,7 +8,7 @@ import lombok.Data;
  **/
 @Data
 @Entity
-@Table(name = "v2_timezones")
+@Table(name = "timezones")
 public class Timezone {
 
     @Id

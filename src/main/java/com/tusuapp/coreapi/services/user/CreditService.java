@@ -1,6 +1,6 @@
 package com.tusuapp.coreapi.services.user;
 
-import com.tusuapp.coreapi.models.CredPointMaster;
+import com.tusuapp.coreapi.models.UserWallet;
 import com.tusuapp.coreapi.repositories.CreditPointRepo;
 import com.tusuapp.coreapi.services.user.notifications.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class CreditService {
     public boolean currentUserHasEnoughCredit(Double amount) {
         try {
             System.out.println("currentUserHasEnoughCredit user " + getCurrentUserId());
-            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByUserId(getCurrentUserId());
+            Optional<UserWallet> creditPointOptional = creditPointRepo.findByUserId(getCurrentUserId());
             if (creditPointOptional.isEmpty()) {
                 creditPointRepo.save(getNewCreditPoint(getCurrentUserId(), 0.0));
                 return false;
@@ -40,7 +40,7 @@ public class CreditService {
     public Double getCurrentUserBalance() {
         try {
             System.out.println("currentUserHasEnoughCredit user " + getCurrentUserId());
-            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByUserId(getCurrentUserId());
+            Optional<UserWallet> creditPointOptional = creditPointRepo.findByUserId(getCurrentUserId());
             if (creditPointOptional.isEmpty()) {
                 creditPointRepo.save(getNewCreditPoint(getCurrentUserId(), 0.0));
                 return 0.0;
@@ -54,12 +54,12 @@ public class CreditService {
 
     public void addCredits(Long studentId, Double amount) {
         try {
-            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByUserId(studentId);
+            Optional<UserWallet> creditPointOptional = creditPointRepo.findByUserId(studentId);
             if (creditPointOptional.isEmpty()) {
                 creditPointRepo.save(getNewCreditPoint(studentId, amount));
                 return;
             }
-            CredPointMaster creditPoint = creditPointOptional.get();
+            UserWallet creditPoint = creditPointOptional.get();
             creditPoint.setBalance(creditPoint.getBalance() + amount);
             try {
                 creditPoint.setUpdatedBy(getCurrentUserId());
@@ -82,12 +82,12 @@ public class CreditService {
 
     public boolean reduceCredits(Long studentId, Double amount) {
         try {
-            Optional<CredPointMaster> creditPointOptional = creditPointRepo.findByUserId(studentId);
+            Optional<UserWallet> creditPointOptional = creditPointRepo.findByUserId(studentId);
             if (creditPointOptional.isEmpty()) {
                 creditPointRepo.save(getNewCreditPoint(studentId, 0.0));
                 throw new IllegalArgumentException("No credit to reduce");
             }
-            CredPointMaster creditPoint = creditPointOptional.get();
+            UserWallet creditPoint = creditPointOptional.get();
             if (creditPoint.getBalance() < amount) {
                 throw new IllegalArgumentException("No enough balance to reduce");
             }
@@ -101,8 +101,8 @@ public class CreditService {
         }
     }
 
-    private CredPointMaster getNewCreditPoint(Long studentId, Double amount) {
-        CredPointMaster creditPoint = new CredPointMaster();
+    private UserWallet getNewCreditPoint(Long studentId, Double amount) {
+        UserWallet creditPoint = new UserWallet();
         creditPoint.setUserId(studentId);
         creditPoint.setBalance(amount);
         creditPoint.setCreatedAt(LocalDateTime.now());
