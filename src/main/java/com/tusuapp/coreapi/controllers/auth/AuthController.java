@@ -1,6 +1,5 @@
 package com.tusuapp.coreapi.controllers.auth;
 
-
 import com.tusuapp.coreapi.models.TutorDetails;
 import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
@@ -50,12 +49,10 @@ public class AuthController {
     @Autowired
     private AuthenticationService authenticationService;
 
-
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @RequestBody Map<String, String> body,
-            HttpServletRequest request
-    ) throws MessagingException, UnsupportedEncodingException {
+            HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
 
         String identifier = body.get("identifier");
         String password = body.get("password");
@@ -65,7 +62,6 @@ public class AuthController {
             return ResponseEntity.unprocessableEntity()
                     .body(Map.of("message", "Identifier and password are required"));
         }
-
 
         // Check for application-name header
         String applicationName = request.getHeader("application-name");
@@ -101,10 +97,10 @@ public class AuthController {
         returnResult.put("blocked", user.getBlocked());
         returnResult.put("confirmed", user.getConfirmed());
 
-//        if (!user.getConfirmed()) {
-//            returnResult.put("message", "Waiting for admin approval");
-//            return ResponseEntity.status(403).body(returnResult);
-//        }
+        // if (!user.getConfirmed()) {
+        // returnResult.put("message", "Waiting for admin approval");
+        // return ResponseEntity.status(403).body(returnResult);
+        // }
 
         if (user.getBlocked()) {
             returnResult.put("message", "Your account is blocked. Please contact our administration");
@@ -124,7 +120,7 @@ public class AuthController {
         // Attach timezone details
         Map<String, Object> response = new HashMap<>();
         UserDto userDto = UserDto.fromUser(user);
-        if(userDto.getRole().getName().equalsIgnoreCase("Tutor")){
+        if (userDto.getRole().getName().equalsIgnoreCase("Tutor")) {
             Optional<TutorDetails> tutorDetails = tutorDetailRepo.findByUserId(user.getId());
             userDto.setCompleteProfile(tutorDetails.isPresent());
         }
@@ -151,14 +147,14 @@ public class AuthController {
         return authenticationService.verifyPhoneOtp(otp, session);
     }
 
+    @PostMapping("/otp/verify-email")
+    public ResponseEntity<?> verifyEmailOtp(@RequestParam String session, @RequestParam String otp) {
+        return authenticationService.verifyEmailOtp(otp, session);
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         return authenticationService.forgotPassword(email);
     }
-
-
-
-
-
 
 }

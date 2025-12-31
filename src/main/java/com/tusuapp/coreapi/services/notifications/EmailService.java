@@ -22,7 +22,6 @@ import java.util.Properties;
 @Service
 public class EmailService {
 
-
     public static final String SGKEY = "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";
 
     @Autowired
@@ -34,7 +33,7 @@ public class EmailService {
     @Value("${TUSU_GODADDY_SMTP_PASSWORD}")
     private String smtpPassword;
 
-    public void sendVerificationEmail(String to, String verificationLink) {
+    public void sendVerificationEmail(String to, String verificationLink, String otp) {
         String body = """
                 <html>
                 <head>
@@ -46,13 +45,16 @@ public class EmailService {
                         .verify-button { display: block; width: fit-content; margin: 25px auto; padding: 12px 24px; background-color: #4CAF50; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; }
                         .verify-button:hover { background-color: #43a047; }
                         .footer { font-size: 12px; color: #999; text-align: center; margin-top: 20px; }
+                        .otp-box { background: #f0f0f0; padding: 10px; text-align: center; font-size: 24px; letter-spacing: 5px; font-weight: bold; margin: 20px 0; border-radius: 4px; }
                     </style>
                 </head>
                 <body>
                     <div class='container'>
                         <h2>Verify Your Email – Tusu App</h2>
                         <p>Hi there,</p>
-                        <p>Thank you for registering with <strong>Tusu App</strong>! Please verify your email address by clicking the button below.</p>
+                        <p>Thank you for registering with <strong>Tusu App</strong>! Please use the OTP below to verify your email address.</p>
+                        <div class='otp-box'>%s</div>
+                        <p>Or verify by clicking the button below.</p>
                         <a href='%s' class='verify-button'>Verify Email</a>
                         <p>If you didn’t create a Tusu account, you can safely ignore this email.</p>
                         <div class='footer'>
@@ -62,7 +64,8 @@ public class EmailService {
                     </div>
                 </body>
                 </html>
-                """.formatted(verificationLink);
+                """
+                .formatted(otp, verificationLink);
 
         try {
             sendEmail(to, "Verify Your Email - Tusu App", body, null);
@@ -103,7 +106,8 @@ public class EmailService {
                     </div>
                 </body>
                 </html>
-                """.formatted(resetLink);
+                """
+                .formatted(resetLink);
 
         try {
             sendEmail(to, "Reset Your Password - Tusu App", body, null);
@@ -114,9 +118,9 @@ public class EmailService {
         }
     }
 
-
     @Async
-    public void sendEmail(String to, String subject, String text, File attachment) throws MessagingException, UnsupportedEncodingException {
+    public void sendEmail(String to, String subject, String text, File attachment)
+            throws MessagingException, UnsupportedEncodingException {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.office365.com");
         mailSender.setPort(587);

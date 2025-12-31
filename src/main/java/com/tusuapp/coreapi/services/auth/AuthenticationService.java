@@ -48,9 +48,9 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final CountryRepo countryRepo;
 
-
     public ResponseEntity<?> verifyEmailLinkClick(String sessionId) {
-        SignUpVerification verification = verificationRepo.findById(sessionId).orElseThrow(() -> new EntityNotFoundException("Session not found"));
+        SignUpVerification verification = verificationRepo.findById(sessionId)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found"));
         verification.setEmailVerified(true);
         User user = verification.getUser();
         user.setIsEmailVerified(true);
@@ -59,12 +59,13 @@ public class AuthenticationService {
         return ResponseEntity.ok().build();
     }
 
-
     public String generateRegisterVerifications(User savedUser) {
         SignUpVerification verification = new SignUpVerification();
         verification.setUser(savedUser);
         verification = verificationRepo.save(verification);
-        emailService.sendVerificationEmail(verification.getUser().getEmail(), VERIFICATION_LINK + verification.getSessionId());
+        verification.setEmailOtp(OTPUtil.generateOTP4());
+        emailService.sendVerificationEmail(verification.getUser().getEmail(),
+                VERIFICATION_LINK + verification.getSessionId(), verification.getEmailOtp());
         verification.setPhoneOtp(OTPUtil.generateOTP4());
         smsService.sendPhoneOtp(savedUser.getPhone(), verification.getPhoneOtp());
         verificationRepo.save(verification);
@@ -117,7 +118,7 @@ public class AuthenticationService {
         }
         user.setCountry(country.get());
         User savedUser = userInfoRepo.save(user);
-        if(request.getRole().equalsIgnoreCase("tutor")){
+        if (request.getRole().equalsIgnoreCase("tutor")) {
             TutorDetails tutorDetails = new TutorDetails();
             tutorDetails.setUser(savedUser);
             tutorDetailRepo.save(tutorDetails);
@@ -132,10 +133,11 @@ public class AuthenticationService {
     }
 
     public ResponseEntity<?> verifyPhoneOtp(String otp, String sessionId) {
-        SignUpVerification verification = verificationRepo.findById(sessionId).orElseThrow(() -> new EntityNotFoundException("Session not found"));
-//        if (!verification.getUser().getId().equals(getCurrentUserId())) {
-//            return errorResponse(HttpStatus.NOT_FOUND, "No otp session found");
-//        }
+        SignUpVerification verification = verificationRepo.findById(sessionId)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found"));
+        // if (!verification.getUser().getId().equals(getCurrentUserId())) {
+        // return errorResponse(HttpStatus.NOT_FOUND, "No otp session found");
+        // }
         if (!verification.getPhoneOtp().equals(otp)) {
             return errorResponse(HttpStatus.BAD_REQUEST, "Wrong OTP");
         }
@@ -147,13 +149,27 @@ public class AuthenticationService {
         return ResponseEntity.ok("OTP Verified");
     }
 
-    public ResponseEntity<?> forgotPassword(String email) {
-        User user = userRepo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Current user not found"));
-        String jwt = jwtService.generateShortToken(user.getId().toString(), user.getEmail());
-        String resetLink = "https://tusuapp.com/accounts/reset-password?token=" + jwt;
-        emailService.sendForgotPasswordEmail(email,resetLink);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> verifyEmailOtp(String otp, String sessionId) {
+        SignUpVerification verification = verificationRepo.findById(sessionId)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found"));
+        if (!verification.getEmailOtp().equals(otp)) {
+            return errorResponse(HttpStatus.BAD_REQUEST, "Wrong OTP");
+        }
+        User user = verification.getUser();
+        user.setIsEmailVerified(true);
+        user = userRepo.save(user);
+        verification.setEmailVerified(true);
+        verification = verificationRepo.save(verification);
+        return ResponseEntity.ok("Email OTP Verified");
     }
 
+    public ResponseEntity<?> forgotPassword(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
+        String jwt = jwtService.generateShortToken(user.getId().toString(), user.getEmail());
+        String resetLink = "https://tusuapp.com/accounts/reset-password?token=" + jwt;
+        emailService.sendForgotPasswordEmail(email, resetLink);
+        return ResponseEntity.ok().build();
+    }
 
 }
