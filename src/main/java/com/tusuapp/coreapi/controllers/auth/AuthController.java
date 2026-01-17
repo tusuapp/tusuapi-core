@@ -2,12 +2,14 @@ package com.tusuapp.coreapi.controllers.auth;
 
 import com.tusuapp.coreapi.models.TutorDetails;
 import com.tusuapp.coreapi.models.User;
+import com.tusuapp.coreapi.models.UserWallet;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.auth.RegistrationRequest;
 import com.tusuapp.coreapi.models.dtos.auth.ResetPasswordDto;
 import com.tusuapp.coreapi.repositories.CountryRepo;
 import com.tusuapp.coreapi.repositories.TutorDetailRepo;
 import com.tusuapp.coreapi.repositories.UserInfoRepo;
+import com.tusuapp.coreapi.repositories.UserWalletRepo;
 import com.tusuapp.coreapi.services.auth.AuthenticationService;
 import com.tusuapp.coreapi.services.auth.JwtService;
 import com.tusuapp.coreapi.services.notifications.EmailService;
@@ -48,6 +50,9 @@ public class AuthController {
 
     @Autowired
     private AuthenticationService authenticationService;
+
+    @Autowired
+    private UserWalletRepo userWalletRepo;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(
@@ -113,6 +118,16 @@ public class AuthController {
             returnResult.remove("blocked");
             returnResult.remove("confirmed");
             return ResponseEntity.status(401).body(returnResult);
+        }
+
+        if (!userWalletRepo.findByUserId(user.getId()).isPresent()) {
+            UserWallet newWallet = new UserWallet();
+            newWallet.setUserId(user.getId());
+            newWallet.setBalance(0.0);
+            newWallet.setCreatedAt(java.time.LocalDateTime.now());
+            newWallet.setUpdatedAt(java.time.LocalDateTime.now());
+            newWallet.setUpdatedBy(user.getId());
+            userWalletRepo.save(newWallet);
         }
 
         String jwt = jwtService.generateToken(user.getId().toString(), user.getEmail());

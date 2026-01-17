@@ -1,17 +1,15 @@
 package com.tusuapp.coreapi.controllers;
 
-
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.persistence.EntityNotFoundException;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+
+import static com.tusuapp.coreapi.utils.ResponseUtil.errorResponse;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -22,12 +20,9 @@ public class ExceptionController {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException e) {
-        JSONObject response = new JSONObject();
-        response.put("error", e.getMessage());
         e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.toMap());
+        return errorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
-
 
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<Object> handleExpiredJwt(ExpiredJwtException ex, WebRequest request) {
