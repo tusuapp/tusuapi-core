@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
+
 import java.util.List;
 
 @Service
@@ -49,12 +51,7 @@ public class AdminPayoutService {
                     .orElseThrow(() -> new IllegalArgumentException("Wallet not found for tutor"));
 
             wallet.setBalance(wallet.getBalance() + request.getAmount());
-            wallet.setUpdatedBy(null); // System update or admin id? Using null or maintaining existing convention.
-            // Usually UpdatedBy tracks who made change. Since it's admin action, ideally
-            // admin ID.
-            // But UserWallet updatedBy is Long. Currently I don't have logged in Admin ID
-            // easily here without SessionUtil/SecurityContext.
-            // I'll leave as is or set timestamp. @UpdateTimestamp handles time.
+            wallet.setUpdatedBy(getCurrentUserId());
             userWalletRepo.save(wallet);
         }
 
