@@ -32,6 +32,7 @@ public class TutorDetailsDto {
     private List<CategoryDto> subjects;
     private List<CategoryDto> disciplines;
     private List<LanguageLocale> languages;
+    private boolean blocked;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -54,6 +55,7 @@ public class TutorDetailsDto {
             dto.setFullName(user.getFullName());
             dto.setEmail(user.getEmail());
             dto.setUserImageUrl(user.getImageUrl());
+            dto.setBlocked(user.getBlocked() != null && user.getBlocked());
         }
         if (entity.getSubjects() != null) {
             List<CategoryDto> subjectDtos = entity.getSubjects().stream().map(sub -> {
@@ -103,6 +105,7 @@ public class TutorDetailsDto {
         dto.setUserImageUrl(user.getImageUrl());
         dto.setConfirmed(user.getConfirmed());
         dto.setCreatedAt(user.getCreatedAt());
+        dto.setBlocked(user.getBlocked() != null && user.getBlocked());
         if (user.getTutorDetails() != null) {
             dto.setApproved(true);
         }

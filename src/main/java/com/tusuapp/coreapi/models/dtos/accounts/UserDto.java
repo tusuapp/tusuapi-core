@@ -5,7 +5,6 @@ import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.CountryDto;
 import lombok.Data;
 
-
 @Data
 public class UserDto {
 
@@ -26,8 +25,8 @@ public class UserDto {
     private boolean isCompleteProfile;
     private String address;
     private boolean isTutorApprovalPending;
-
-
+    private boolean blocked;
+    private Double coinBalance;
 
     public static UserDto fromUser(User user) {
         UserDto dto = new UserDto();
@@ -36,7 +35,7 @@ public class UserDto {
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
         dto.setConfirmed(user.getConfirmed());
-        if(user.getCountry() !=null) {
+        if (user.getCountry() != null) {
             dto.setCountry(CountryDto.fromCountry(user.getCountry()));
         }
         dto.setRole(new Role(user.getRole()));
@@ -48,9 +47,9 @@ public class UserDto {
         dto.setTimeZoneOffset(user.getTimeZoneOffset());
         dto.setAddress(user.getAddress());
         dto.setMobileVerified(user.getIsMobileVerified());
+        dto.setBlocked(user.getBlocked() != null && user.getBlocked());
         return dto;
     }
-
 
     @Data
     public static class Role {
@@ -61,14 +60,12 @@ public class UserDto {
         public Role(int code) {
             if (code == 3) {
                 this.id = 3;
-                this.name
-                        = "Student";
+                this.name = "Student";
                 this.type = "student";
             }
-            if(code == 4){
+            if (code == 4) {
                 this.id = 4;
-                this.name
-                        = "Tutor";
+                this.name = "Tutor";
                 this.type = "tutor";
             }
         }

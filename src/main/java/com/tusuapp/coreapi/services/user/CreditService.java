@@ -11,7 +11,6 @@ import java.util.Optional;
 
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 
-
 @Service
 public class CreditService {
 
@@ -79,6 +78,25 @@ public class CreditService {
         }
     }
 
+    public void addAdminCredits(Long studentId, Double amount) {
+        try {
+            Optional<UserWallet> creditPointOptional = creditPointRepo.findByUserId(studentId);
+            if (creditPointOptional.isEmpty()) {
+                creditPointRepo.save(getNewCreditPoint(studentId, amount));
+                return;
+            }
+            UserWallet creditPoint = creditPointOptional.get();
+            creditPoint.setBalance(creditPoint.getBalance() + amount);
+            creditPoint.setUpdatedBy(getCurrentUserId());
+            notificationService.addNotification(studentId,
+                    "Credits Added",
+                    "Credited by Admin", true);
+            creditPoint.setUpdatedAt(LocalDateTime.now());
+            creditPointRepo.save(creditPoint);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public boolean reduceCredits(Long studentId, Double amount) {
         try {
