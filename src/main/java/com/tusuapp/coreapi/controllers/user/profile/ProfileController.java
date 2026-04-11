@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -55,6 +57,11 @@ public class ProfileController {
     @GetMapping("/me")
     public ResponseEntity<?> getAuthUser() {
         return profileService.getCurrentUser();
+    }
+
+    @PostMapping(value = "/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadProfilePhoto(@RequestParam("file") MultipartFile file) {
+        return profileService.uploadProfilePhoto(file);
     }
 
     @PostMapping("/reset-password")

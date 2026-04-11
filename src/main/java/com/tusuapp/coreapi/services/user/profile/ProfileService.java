@@ -6,22 +6,30 @@ import com.tusuapp.coreapi.models.dtos.accounts.UpdateProfileDto;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.auth.ResetPasswordDto;
 import com.tusuapp.coreapi.repositories.*;
+import com.tusuapp.coreapi.services.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.tusuapp.coreapi.utils.SessionUtil.*;
 
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
+
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+    private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
 
     private final BookingRequestRepo bookingRequestRepo;
     private final UserInfoRepo userRepo;
@@ -30,6 +38,7 @@ public class ProfileService {
     private final CategoryRepo categoryRepo;
     private final LanguageLocalRepo languageRepo;
     private final PasswordEncoder passwordEncoder;
+    private final S3Service s3Service;
 
 
     public ResponseEntity<?> getUserTotalClassesCount() {
@@ -128,6 +137,31 @@ public class ProfileService {
             }
         }
         return ResponseEntity.ok(userDto);
+    }
+
+    public ResponseEntity<?> uploadProfilePhoto(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No file provided"));
+        }
+        if (!ALLOWED_TYPES.contains(file.getContentType())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Only JPEG, PNG, and WebP images are allowed"));
+        }
+        if (file.getSize() > MAX_FILE_SIZE) {
+            return ResponseEntity.badRequest().body(Map.of("error", "File size must not exceed 5 MB"));
+        }
+        Long userId = getCurrentUserId();
+        String ext = file.getContentType().split("/")[1];
+        String key = "profile-photos/" + userId + "/" + UUID.randomUUID() + "." + ext;
+        try {
+            String url = s3Service.uploadFile(file, key);
+            User user = userRepo.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+            user.setImageUrl(url);
+            user = userRepo.save(user);
+            return ResponseEntity.ok(UserDto.fromUser(user));
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", "Failed to upload image"));
+        }
     }
 
     public ResponseEntity<?> resetPassword(ResetPasswordDto resetPasswordDto) {
