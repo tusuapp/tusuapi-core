@@ -147,6 +147,33 @@ public class CreditService {
         return true;
     }
 
+    // ── Tutor Earnings ────────────────────────────────────────────────────────
+
+    public ResponseEntity<?> getTutorEarnings(int page, int size) {
+        Long userId = getCurrentUserId();
+
+        Double totalEarned = creditTransactionRepo.sumAmountByUserIdAndDescription(userId, "Earned from completed class");
+        Double totalWithdrawn = creditTransactionRepo.sumAmountByUserIdAndDescription(userId, "Withdrawal requested");
+        Double currentBalance = getCurrentUserBalance();
+
+        Page<CreditTransaction> historyPage = creditTransactionRepo
+                .findByUserIdAndDescriptionOrderByCreatedAtDesc(userId, "Earned from completed class", PageRequest.of(page, size));
+
+        return ResponseEntity.ok(Map.of(
+                "summary", Map.of(
+                        "totalEarned",    totalEarned   != null ? totalEarned   : 0.0,
+                        "totalWithdrawn", totalWithdrawn != null ? totalWithdrawn : 0.0,
+                        "currentBalance", currentBalance,
+                        "totalClasses",   historyPage.getTotalElements()
+                ),
+                "history",       historyPage.getContent().stream().map(CreditTransactionDto::from).toList(),
+                "totalElements", historyPage.getTotalElements(),
+                "totalPages",    historyPage.getTotalPages(),
+                "page",          historyPage.getNumber(),
+                "size",          historyPage.getSize()
+        ));
+    }
+
     // ── Payout helpers (called by PayoutService / AdminPayoutService) ─────────
 
     public void logWithdrawal(Long userId, Double amount) {

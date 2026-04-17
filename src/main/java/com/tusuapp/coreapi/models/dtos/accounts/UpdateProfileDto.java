@@ -18,6 +18,5 @@ public class UpdateProfileDto {
     private String address;
     private List<Long> subjects;
     private List<Long> languages;
-    private List<Long> disciplines;
     private Double hourlyCharge;
 }

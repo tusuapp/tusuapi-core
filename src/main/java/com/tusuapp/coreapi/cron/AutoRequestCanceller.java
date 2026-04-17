@@ -68,7 +68,10 @@ public class AutoRequestCanceller {
 
     @Scheduled(fixedDelay = 30 * 1000)
     public void autoCompleteBookingSession() {
-        List<BookingRequest> requests = bookingRequestRepo.findAllByStatusAndEndTimeLessThanEqual(BookingConstants.STATUS_INPROGRESS, getCurrentUTCTime());
+        List<BookingRequest> requests = bookingRequestRepo.findAllByStatusInAndEndTimeLessThanEqual(
+                List.of(BookingConstants.STATUS_INPROGRESS, BookingConstants.STATUS_ACCEPTED),
+                getCurrentUTCTime()
+        );
         stopSessions(requests);
         if (requests.size() > 0)
             System.out.println("Stopped " + requests.size() + " sessions");

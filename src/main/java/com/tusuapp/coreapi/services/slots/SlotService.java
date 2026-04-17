@@ -17,22 +17,19 @@ import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserId;
 import static com.tusuapp.coreapi.utils.SessionUtil.getCurrentUserTimeZone;
 import static com.tusuapp.coreapi.utils.converters.TimeZoneConverter.*;
 
-
 @Service
 public class SlotService {
 
     @Autowired
     private TutorSlotRepo tutorSlotRepo;
 
-
     public ResponseEntity<?> createSlot(CreateSlotDto createSlotDto) {
         TutorSlot slot = new TutorSlot();
         slot.setFromDatetime(getUtcDateTime(createSlotDto.getFromDateTime()));
-        System.out.println(createSlotDto);
-        if(createSlotDto.isTrialSlot()){
+        if (createSlotDto.isTrialSlot()) {
             slot.setToDatetime(getUtcDateTime(createSlotDto.getFromDateTime().plusMinutes(15)));
             slot.setTrialSlot(true);
-        }else{
+        } else {
             slot.setToDatetime(getUtcDateTime(createSlotDto.getFromDateTime().plusHours(1)));
         }
         List<TutorSlot> overLappingSlots = tutorSlotRepo.findOverlappingSlots(getCurrentUserId(),
@@ -60,18 +57,18 @@ public class SlotService {
         LocalDateTime utcStartLdt = LocalDateTime.ofInstant(utcStart, ZoneOffset.UTC);
         LocalDateTime utcEndLdt = LocalDateTime.ofInstant(utcEnd, ZoneOffset.UTC);
         List<TutorSlot> slots = tutorSlotRepo.findAllByTutorIdAndFromDatetimeBetween(
-                tutorId, utcStartLdt, utcEndLdt
-        );
+                tutorId, utcStartLdt, utcEndLdt);
         transformTutorSlotsFromUTC(slots);
         return ResponseEntity.ok(slots);
     }
 
     public ResponseEntity<?> deleteSlot(Long slotId) {
-        TutorSlot slot = tutorSlotRepo.findById(slotId).orElseThrow(() -> new IllegalArgumentException("No slot found"));
+        TutorSlot slot = tutorSlotRepo.findById(slotId)
+                .orElseThrow(() -> new IllegalArgumentException("No slot found"));
         if (!Objects.equals(slot.getTutorId(), getCurrentUserId())) {
             return errorResponse(HttpStatus.NOT_FOUND, "No slot found");
         }
-        if(slot.getIsBooked()){
+        if (slot.getIsBooked()) {
             return errorResponse(HttpStatus.BAD_REQUEST, "Slot is already booked, cancel the booking first");
         }
         tutorSlotRepo.deleteById(slotId);

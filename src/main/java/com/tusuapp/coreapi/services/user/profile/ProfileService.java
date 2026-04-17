@@ -40,10 +40,10 @@ public class ProfileService {
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
 
-
     public ResponseEntity<?> getUserTotalClassesCount() {
         JSONObject response = new JSONObject();
-        long count = bookingRequestRepo.countByStudentIdAndStatus(getCurrentUserId(), BookingConstants.STATUS_COMPLETED);
+        long count = bookingRequestRepo.countByStudentIdAndStatus(getCurrentUserId(),
+                BookingConstants.STATUS_COMPLETED);
         response.put("totalClasses", count);
         return ResponseEntity.ok(response.toMap());
     }
@@ -82,18 +82,19 @@ public class ProfileService {
         User user = userRepo.findById(getCurrentUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         TutorDetails tutorDetails = tutorDetailRepo.findByUserId(getCurrentUserId())
-                .orElseThrow(() -> new IllegalArgumentException("No tutor details found, profile might not be completed"));
+                .orElseThrow(
+                        () -> new IllegalArgumentException("No tutor details found, profile might not be completed"));
         if (null != updateDto.getFullName()) {
             user.setFullName(updateDto.getFullName());
         }
-        if(updateDto.getPhone() != null && updateDto.getPhone().length()>5) {
+        if (updateDto.getPhone() != null && updateDto.getPhone().length() > 5) {
             user.setPhone(updateDto.getPhone());
         }
-        //update country
+        // update country
         Country country = countryRepo.findById(updateDto.getCountryId())
                 .orElseThrow(() -> new IllegalArgumentException("No country found"));
         user.setCountry(country);
-        //update languages,discpline and languages
+        // update languages,discpline and languages
         updatePreferences(tutorDetails, updateDto);
         user.setTimeZone(updateDto.getTimezone());
         user.setAddress(updateDto.getAddress());
@@ -112,8 +113,6 @@ public class ProfileService {
     private void updatePreferences(TutorDetails tutorDetails, UpdateProfileDto updateDto) {
         List<Category> subjects = categoryRepo.findAllById(updateDto.getSubjects());
         tutorDetails.setSubjects(subjects);
-        List<Category> disciplines = categoryRepo.findAllById(updateDto.getDisciplines());
-        tutorDetails.setDisciplines(disciplines);
         List<LanguageLocale> languages = languageRepo.findAllById(updateDto.getLanguages());
         tutorDetails.setLanguages(languages);
     }
@@ -123,14 +122,15 @@ public class ProfileService {
     }
 
     public ResponseEntity<?> getCurrentUser() {
-        User user = userRepo.findById(getCurrentUserId()).orElseThrow(() -> new EntityNotFoundException("Invalid user"));
+        User user = userRepo.findById(getCurrentUserId())
+                .orElseThrow(() -> new EntityNotFoundException("Invalid user"));
         UserDto userDto = UserDto.fromUser(user);
         userDto.setRole(new UserDto.Role(isStudent() ? 3 : 4));
         if (isTutor()) {
             Optional<TutorDetails> details = tutorDetailRepo.findByUserId(user.getId());
             if (details.isPresent()) {
-                System.out.println(details.get());
-                boolean isProfileComplete = details.get().getLanguages().size() > 0 && details.get().getDisciplines().size() > 0
+                boolean isProfileComplete = details.get().getLanguages().size() > 0
+                        && details.get().getSubjects().size() > 0
                         && details.get().getHourlyCharge() != null && details.get().getExperience() != null;
                 userDto.setCompleteProfile(isProfileComplete);
                 userDto.setTutorApprovalPending(!user.getConfirmed());
@@ -165,7 +165,8 @@ public class ProfileService {
     }
 
     public ResponseEntity<?> resetPassword(ResetPasswordDto resetPasswordDto) {
-        User user = userRepo.findById(getCurrentUserId()).orElseThrow(() -> new EntityNotFoundException("Token expired"));
+        User user = userRepo.findById(getCurrentUserId())
+                .orElseThrow(() -> new EntityNotFoundException("Token expired"));
         if (!resetPasswordDto.getPassword().equals(resetPasswordDto.getConfirmPassword())) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Passwords do not match"));

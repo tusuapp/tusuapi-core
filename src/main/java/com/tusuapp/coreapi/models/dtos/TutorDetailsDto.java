@@ -30,7 +30,6 @@ public class TutorDetailsDto {
     private boolean confirmed;
     private String gender;
     private List<CategoryDto> subjects;
-    private List<CategoryDto> disciplines;
     private List<LanguageLocale> languages;
     private boolean blocked;
     private Instant createdAt;
@@ -67,17 +66,6 @@ public class TutorDetailsDto {
             dto.setSubjects(subjectDtos);
         } else {
             dto.setSubjects(Collections.emptyList());
-        }
-        if (entity.getDisciplines() != null) {
-            List<CategoryDto> disciplineDtos = entity.getDisciplines().stream().map(disc -> {
-                CategoryDto catDto = new CategoryDto();
-                catDto.setId(disc.getId());
-                catDto.setName(disc.getName());
-                return catDto;
-            }).toList();
-            dto.setDisciplines(disciplineDtos);
-        } else {
-            dto.setDisciplines(Collections.emptyList());
         }
         if (entity.getLanguages() != null) {
             List<LanguageLocale> languageDtos = entity.getLanguages().stream().map(lang -> {

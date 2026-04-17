@@ -5,6 +5,7 @@ import com.tusuapp.coreapi.models.User;
 import com.tusuapp.coreapi.models.dtos.accounts.UpdateProfileDto;
 import com.tusuapp.coreapi.models.dtos.accounts.UserDto;
 import com.tusuapp.coreapi.models.dtos.auth.ResetPasswordDto;
+import com.tusuapp.coreapi.services.user.CreditService;
 import com.tusuapp.coreapi.services.user.profile.ProfileService;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import static com.tusuapp.coreapi.utils.SessionUtil.*;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final CreditService creditService;
 
     @GetMapping("/total-classes")
     private ResponseEntity<?> getUserTotalClasses(){
@@ -62,6 +64,14 @@ public class ProfileController {
     @PostMapping(value = "/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadProfilePhoto(@RequestParam("file") MultipartFile file) {
         return profileService.uploadProfilePhoto(file);
+    }
+
+    @GetMapping("/tutor/earnings")
+    @PreAuthorize("hasRole('ROLE_TUTOR')")
+    public ResponseEntity<?> getTutorEarnings(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return creditService.getTutorEarnings(page, size);
     }
 
     @PostMapping("/reset-password")
