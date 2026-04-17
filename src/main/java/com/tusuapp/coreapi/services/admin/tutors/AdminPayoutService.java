@@ -7,6 +7,7 @@ import com.tusuapp.coreapi.models.dtos.payments.PayoutResponseDto;
 import com.tusuapp.coreapi.models.enums.PayoutStatus;
 import com.tusuapp.coreapi.repositories.PayoutRequestRepo;
 import com.tusuapp.coreapi.repositories.UserWalletRepo;
+import com.tusuapp.coreapi.services.user.CreditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class AdminPayoutService {
 
     private final PayoutRequestRepo payoutRequestRepo;
     private final UserWalletRepo userWalletRepo;
+    private final CreditService creditService;
 
     public List<PayoutResponseDto> getAllPayoutRequests() {
         return payoutRequestRepo.findAll().stream()
@@ -53,6 +55,7 @@ public class AdminPayoutService {
             wallet.setBalance(wallet.getBalance() + request.getAmount());
             wallet.setUpdatedBy(getCurrentUserId());
             userWalletRepo.save(wallet);
+            creditService.logPayoutRejected(request.getTutor().getId(), request.getAmount());
         }
 
         request = payoutRequestRepo.save(request);

@@ -6,6 +6,7 @@ import com.tusuapp.coreapi.models.UserWallet;
 import com.tusuapp.coreapi.models.enums.PayoutStatus;
 import com.tusuapp.coreapi.repositories.PayoutRequestRepo;
 import com.tusuapp.coreapi.repositories.UserWalletRepo;
+import com.tusuapp.coreapi.services.user.CreditService;
 import com.tusuapp.coreapi.utils.SessionUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class PayoutService {
 
     private final PayoutRequestRepo payoutRequestRepo;
     private final UserWalletRepo userWalletRepo;
+    private final CreditService creditService;
 
     @Transactional
     public PayoutRequest createPayoutRequest(Double amount) {
@@ -56,7 +58,9 @@ public class PayoutService {
         request.setStatus(PayoutStatus.PENDING);
         request.setCurrency("USD");
 
-        return payoutRequestRepo.save(request);
+        PayoutRequest saved = payoutRequestRepo.save(request);
+        creditService.logWithdrawal(currentUserId, amount);
+        return saved;
     }
 
     public List<PayoutRequest> getPayoutRequests() {

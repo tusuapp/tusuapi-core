@@ -52,7 +52,7 @@ public class AutoRequestCanceller {
             refunds.put(r.getStudent().getId(), r.getHourlyCharge());
             r.setStatus(BookingConstants.STATUS_AUTO_CANCELLED);
         });
-        refunds.forEach((k, v) -> creditService.addCredits(k, v));
+        refunds.forEach((k, v) -> creditService.addCredits(k, v, "Refund - booking auto cancelled"));
         bookingRequestRepo.saveAll(requests);
     }
 
@@ -98,7 +98,7 @@ public class AutoRequestCanceller {
     public void stopSessions(List<BookingRequest> requests) {
         requests.forEach((r) -> {
             r.setStatus(BookingConstants.STATUS_COMPLETED);
-            creditService.addCredits(r.getTutor().getId(), r.getHourlyCharge());
+            creditService.addCredits(r.getTutor().getId(), r.getHourlyCharge(), "Earned from completed class");
         });
         bookingRequestRepo.saveAll(requests);
     }
